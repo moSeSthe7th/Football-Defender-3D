@@ -69,7 +69,7 @@ public class DefenderScript : MonoBehaviour
     {
         foreach(Vector2 playerInputPos in playerInputPositions)
         {
-            Vector3 defenderSlidePos = new Vector3(transform.position.x + playerInputPos.x / 500f, transform.position.y, transform.position.z + playerInputPos.y / 500f);
+            Vector3 defenderSlidePos = new Vector3(transform.position.x + playerInputPos.x / 300f, transform.position.y, transform.position.z + playerInputPos.y / 300f);
             defenderSlidePositions.Add(defenderSlidePos);
             Debug.Log("Defender Slide Pos: " + defenderSlidePos + " Player input pos: " + playerInputPos);
         }
