@@ -12,7 +12,7 @@ public class DefenderScript : MonoBehaviour
 
     Animator animator;
 
-    public List<Vector2> playerInputPositions;
+   
     List<Vector3> defenderSlidePositions;
     UIManager uIManager;
 
@@ -20,7 +20,7 @@ public class DefenderScript : MonoBehaviour
     {
         uIManager = FindObjectOfType(typeof(UIManager)) as UIManager;
         defenderSlidePositions = new List<Vector3>();
-        playerInputPositions = new List<Vector2>();
+        //playerInputPositions = new List<Vector2>();
         touchStartPos = new Vector2();
         touchDelta = new Vector2();
         animator = GetComponentInChildren<Animator>();
@@ -50,8 +50,18 @@ public class DefenderScript : MonoBehaviour
             }
             else
             {
-                touchDelta = gInput.currentPosition - touchStartPos;
-                playerInputPositions.Add(touchDelta);
+                Ray ray = Camera.main.ScreenPointToRay(gInput.currentPosition);
+                RaycastHit raycastHit;
+
+                if (Physics.Raycast(ray, out raycastHit))
+                {
+                    if (raycastHit.transform.gameObject.tag == "Pitch")
+                    {
+                        defenderSlidePositions.Add(raycastHit.point);
+                    }
+
+                }
+
             }
         }
     }
@@ -67,13 +77,7 @@ public class DefenderScript : MonoBehaviour
 
     IEnumerator SlidingTackle()
     {
-        foreach(Vector2 playerInputPos in playerInputPositions)
-        {
-            Vector3 defenderSlidePos = new Vector3(transform.position.x + playerInputPos.x / 130f, transform.position.y, transform.position.z + playerInputPos.y / 130f);
-            defenderSlidePositions.Add(defenderSlidePos);
-            Debug.Log("Defender Slide Pos: " + defenderSlidePos + " Player input pos: " + playerInputPos);
-        }
-
+       
         animator.SetBool("isTackling", true);
 
         float slideSpeed = 0.15f; //Vector3.SqrMagnitude(slideTo) / 500f;
