@@ -80,17 +80,17 @@ public class DefenderScript : MonoBehaviour
        
         animator.SetBool("isTackling", true);
 
-        float slideSpeed = 0.15f; //Vector3.SqrMagnitude(slideTo) / 500f;
+        float slideSpeed = 0.5f; //Vector3.SqrMagnitude(slideTo) / 500f;
 
         for (int i = 0;i < defenderSlidePositions.Count-1; i++)
         {
             while (Vector3.SqrMagnitude(defenderSlidePositions[i] - transform.position) > 0.2f)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(defenderSlidePositions[i] - transform.position);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 20f * Time.deltaTime);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 40f * Time.deltaTime);
 
                 transform.position = Vector3.MoveTowards(transform.position, defenderSlidePositions[i], slideSpeed);
-                yield return new WaitForEndOfFrame();
+                yield return new WaitForSecondsRealtime(0.01f);
             }
         }
 
