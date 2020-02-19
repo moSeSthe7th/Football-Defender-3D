@@ -4,9 +4,8 @@ using UnityEngine;
 
 public class AttackerScript : MonoBehaviour
 {
-
     GameObject ball;
-    public Transform[] dribblePoints;
+    Transform[] dribblePoints;
     int dribblePointNo;
 
     Vector3 dribbleTo;
@@ -19,6 +18,8 @@ public class AttackerScript : MonoBehaviour
 
     Animator attackerAnimator;
 
+    public Vector3 shootPos;
+
     void Start()
     {
         attackerAnimator = GetComponent<Animator>();
@@ -29,6 +30,7 @@ public class AttackerScript : MonoBehaviour
         //CloseRagdollPhysics();
         ballY = ball.transform.position.y;
         isTackled = false;
+        dribblePoints = transform.GetChild(1).GetComponent<DribblePoints>().GetDribblePoints();
         StartCoroutine(DribbleTheBall());
         rb = GetComponent<Rigidbody>();
         
@@ -39,15 +41,27 @@ public class AttackerScript : MonoBehaviour
         while (dribblePointNo < dribblePoints.Length && !isTackled && !DataScript.isGameOver)
         {
             DribbleWithBall();
-            yield return new WaitForEndOfFrame();
+            yield return new WaitForSecondsRealtime(0.01f);
         }
 
         if (!isTackled)
         {
+            ball.transform.parent = null;
+            while (Vector3.SqrMagnitude(ball.transform.position - shootPos) > 0.5f)
+            {
+                SendBallToGoal();
+                yield return new WaitForSecondsRealtime(0.01f);
+            }
             uIManager.GameOver();
             attackerAnimator.SetBool("isAttackerWon", true);
         }
            
+    }
+
+    void SendBallToGoal()
+    {
+        ball.transform.Rotate(new Vector3(-75f, 0, 0));
+        ball.transform.position = Vector3.MoveTowards(ball.transform.position, shootPos, 1f);
     }
 
     void DribbleWithBall()
@@ -56,11 +70,11 @@ public class AttackerScript : MonoBehaviour
         dribbleTo.y = ballY;
 
         Quaternion targetRotation = Quaternion.LookRotation(ball.transform.position - transform.position);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 20f * Time.deltaTime);
-        transform.position = Vector3.MoveTowards(transform.position, ball.transform.position, 0.05f);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 40f * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, ball.transform.position, 0.1f);
 
-        ball.transform.Rotate(new Vector3(-20f, 0, 0));
-        ball.transform.position = Vector3.MoveTowards(transform.position, dribbleTo, 0.2f);
+        ball.transform.Rotate(new Vector3(-40f, 0, 0));
+        ball.transform.position = Vector3.MoveTowards(transform.position, dribbleTo, 0.4f);
 
 
         isReachedDribblePoint();

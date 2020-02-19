@@ -7,13 +7,14 @@ public class InitializationScript : MonoBehaviour
    
     void Awake()
     {
+        Application.targetFrameRate = 30;
         DataScript.inputLock = false;
         DataScript.totalAttackerCount = 0;
         DataScript.tackledAttackerCount = 0;
         DataScript.isLevelPassed = false;
         DataScript.isGameOver = false;
 
-        DataScript.maxLevel = 2;
+        DataScript.maxLevel = 3;
         DataScript.currentLevel = PlayerPrefs.GetInt("Current Level", 1);
         
         GameObject primaryMap = Instantiate(Resources.Load<GameObject>("Levels/" + DataScript.currentLevel.ToString()), Vector3.zero, Quaternion.identity);
