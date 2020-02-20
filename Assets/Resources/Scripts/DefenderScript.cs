@@ -38,6 +38,7 @@ public class DefenderScript : MonoBehaviour
 
             if(gInput.phase == IPhase.Began)
             {
+                uIManager.SlideStarted();
                 touchStartPos = gInput.currentPosition;
             }
             else if(gInput.phase == IPhase.Ended)
