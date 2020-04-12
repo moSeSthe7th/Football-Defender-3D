@@ -24,6 +24,14 @@ public class UIManager : MonoBehaviour
         infoText = pitch.GetComponentInChildren<Text>();
         infoText.text = "";
 
+        //set event
+        InputEventListener.inputEvent.onTouchStarted += SlideStarted;
+    }
+
+    private void OnDestroy()
+    {
+        //Remove void from event since uimanager does no longer exist. it will create nullReferenceExapcition otherwise
+        InputEventListener.inputEvent.onTouchStarted -= SlideStarted;
     }
 
     public void GameOver()
@@ -47,10 +55,13 @@ public class UIManager : MonoBehaviour
         shareButton.gameObject.SetActive(true);
     }
 
-    public void SlideStarted()
+    public void SlideStarted(Vector2 touchPos)
     {
-        settingsButton.gameObject.SetActive(false);
-        trophiesButton.gameObject.SetActive(false);
-        shareButton.gameObject.SetActive(false);
+        if(!DataScript.isGameOver)
+        {
+            settingsButton.gameObject.SetActive(false);
+            trophiesButton.gameObject.SetActive(false);
+            shareButton.gameObject.SetActive(false);
+        }
     }
 }

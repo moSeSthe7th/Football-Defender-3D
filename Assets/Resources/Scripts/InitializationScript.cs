@@ -4,10 +4,9 @@ using UnityEngine;
 
 public class InitializationScript : MonoBehaviour
 {
-   
     void Awake()
     {
-        Application.targetFrameRate = 30;
+        //Application.targetFrameRate = 30;
         DataScript.inputLock = false;
         DataScript.totalAttackerCount = 0;
         DataScript.tackledAttackerCount = 0;
@@ -20,9 +19,5 @@ public class InitializationScript : MonoBehaviour
         GameObject primaryMap = Instantiate(Resources.Load<GameObject>("Levels/" + DataScript.currentLevel.ToString()), Vector3.zero, Quaternion.identity);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
 }

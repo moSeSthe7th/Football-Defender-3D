@@ -1,17 +1,13 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UtmostInput;
 
 public class DefenderScript : MonoBehaviour
 {
-    InputX inputX;
-
-    Vector2 touchStartPos;
-    Vector2 touchDelta;
-
     Animator animator;
-
+    InputToBezierRoute bezierCalculator;
    
     List<Vector3> defenderSlidePositions;
     UIManager uIManager;
@@ -20,60 +16,46 @@ public class DefenderScript : MonoBehaviour
     {
         uIManager = FindObjectOfType(typeof(UIManager)) as UIManager;
         defenderSlidePositions = new List<Vector3>();
-        //playerInputPositions = new List<Vector2>();
-        touchStartPos = new Vector2();
-        touchDelta = new Vector2();
+        
         animator = GetComponentInChildren<Animator>();
-        //CloseRagdollPhysics();
-        inputX = new InputX();
+
+        bezierCalculator = new InputToBezierRoute(transform.position);
     }
 
   
     void Update()
     {
-        if (inputX.GetInputs() && !DataScript.inputLock)
+        if(bezierCalculator.routeComplete)
         {
-            
-            GeneralInput gInput = inputX.GetInput(0);
+            defenderSlidePositions = bezierCalculator.bezierPoints;
+            StartCoroutine(SlidingTackle());
 
-            if(gInput.phase == IPhase.Began)
-            {
-                uIManager.SlideStarted();
-                touchStartPos = gInput.currentPosition;
-            }
-            else if(gInput.phase == IPhase.Ended)
-            {
-                //touchDelta = gInput.currentPosition - touchStartPos;
-                //playerInputPositions.Add(touchDelta);
-               
-                StartCoroutine(SlidingTackle());
-                DataScript.inputLock = true;
-            }
-            else
-            {
-                Ray ray = Camera.main.ScreenPointToRay(gInput.currentPosition);
-                RaycastHit raycastHit;
-
-                if (Physics.Raycast(ray, out raycastHit))
-                {
-                    if (raycastHit.transform.gameObject.tag == "Pitch")
-                    {
-                        defenderSlidePositions.Add(raycastHit.point);
-                    }
-
-                }
-
-            }
+            bezierCalculator.routeComplete = false;
         }
     }
+
+    
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "Attacker")
         {
             other.GetComponent<AttackerScript>().Tackled(transform.position);
+
+            DataScript.tackledAttackerCount++;
+
+            if (DataScript.tackledAttackerCount >= DataScript.totalAttackerCount)
+            {
+                DataScript.isLevelPassed = true;
+                uIManager.LevelPassed();
+            }
         }
       
+    }
+
+    private void OnDestroy()
+    {
+        bezierCalculator.Dispose();
     }
 
     IEnumerator SlidingTackle()
@@ -99,9 +81,11 @@ public class DefenderScript : MonoBehaviour
         animator.SetBool("isTackleEnded", true);
 
         yield return new WaitForSecondsRealtime(0.5f);
+
+        DataScript.isGameOver = true;
+
         if (!DataScript.isLevelPassed)
         {
-            DataScript.isGameOver = true;
             uIManager.GameOver();
             animator.SetBool("isLost", true);
         }
