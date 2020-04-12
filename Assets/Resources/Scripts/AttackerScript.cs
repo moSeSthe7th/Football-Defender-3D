@@ -19,14 +19,17 @@ public class AttackerScript : MonoBehaviour
 
     void Start()
     {
+
         attackerAnimator = GetComponent<Animator>();
         DataScript.totalAttackerCount++;
         ball = transform.GetChild(0).gameObject;
         dribblePointNo = 0;
-        //CloseRagdollPhysics();
+        
         ballY = ball.transform.position.y;
         isTackled = false;
         dribblePoints = transform.GetChild(1).GetComponent<DribblePoints>().GetDribblePoints();
+
+        OpenColliders();
 
         InputEventListener.inputEvent.onTouchStarted += StartRunning;        
     }
@@ -102,12 +105,42 @@ public class AttackerScript : MonoBehaviour
         if(isTackled == false)
         {
             isTackled = true;
-            OpenRagdollPhysics(tacklePos);
+            ApplyTackleForce(tacklePos);
+            //OpenRagdollPhysics();
         }        
     }
     
-    void OpenRagdollPhysics(Vector3 tacklePos)
+    void OpenColliders()
     {
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+
+        foreach (Collider collider in colliders)
+        {
+            collider.isTrigger = false;
+        }
+
+    }
+
+    void ApplyTackleForce(Vector3 tacklePos)
+    {
+        attackerAnimator.enabled = false;
+        transform.parent = null;
+
+        Rigidbody[] rigidbodies = GetComponentsInChildren<Rigidbody>();
+
+        foreach (Rigidbody rigidbody in rigidbodies)
+        {
+            rigidbody.useGravity = true;
+
+            //this is for this game only!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            rigidbody.AddExplosionForce(1250f, tacklePos, 100f, 20f);
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        }
+    }
+
+    void OpenRagdollPhysics()
+    {
+        attackerAnimator.enabled = false;
         transform.parent = null;
 
         Collider[] colliders = GetComponentsInChildren<Collider>();
@@ -122,15 +155,8 @@ public class AttackerScript : MonoBehaviour
         {
             rigidbody.useGravity = true;
 
-            //this is for this game only!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            rigidbody.AddExplosionForce(2000f, tacklePos, 1000f, 1000f);
-            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
             //rigidbody.isKinematic = false;
         }
-        GetComponent<Animator>().enabled = false;
-
-        
         
     }
 
