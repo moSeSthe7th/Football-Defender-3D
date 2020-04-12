@@ -108,7 +108,7 @@ public class InputToBezierRoute : IDisposable
 
         if (Physics.Raycast(ray, out raycastHit))
         {
-            //if (raycastHit.transform.gameObject.tag == "Pitch")
+            if (raycastHit.transform.gameObject.tag == "Pitch")
             {
                 touchPositions.Add(raycastHit.point);
                 return true;
