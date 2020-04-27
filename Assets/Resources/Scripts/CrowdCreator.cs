@@ -24,7 +24,7 @@ public class CrowdCreator : MonoBehaviour
         actualScale = Vector3.Scale(seatingMesh.bounds.size, transform.localScale);
 
         float seatArea = (actualScale.x) * (actualScale.z);
-        WatcherCount = (int)seatArea;
+        WatcherCount = (int)seatArea / 2;
         //Debug.Log(actualScale);
 
         watcherPrefab = (GameObject)Resources.Load("Prefabs/Watcher");
@@ -35,12 +35,13 @@ public class CrowdCreator : MonoBehaviour
         PlaceWatchers();
 
     }
-    Vector3 org;
+
+  /*  Vector3 org;
     private void FixedUpdate()
     {
         //foreach()
         Debug.DrawRay(org, Vector3.down, Color.green);
-    }
+    }*/
 
     void CreateWatchers(int count)
     {
@@ -78,7 +79,7 @@ public class CrowdCreator : MonoBehaviour
         RaycastHit rayHit;
 
         Vector3 origin = new Vector3(currPos.position.x, currPos.position.y, currPos.position.z);
-        org = origin;
+        //org = origin;
         if(Physics.Raycast(origin, Vector3.down,out rayHit,10f))
         {
             //Debug.Log(rayHit.point);

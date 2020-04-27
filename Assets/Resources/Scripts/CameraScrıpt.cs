@@ -42,7 +42,7 @@ public class CameraScrıpt : MonoBehaviour
         GamePlayRotation = Quaternion.Euler/*(55f, 0f, 0f);*/ (35f, 0f, 0f); //30 0 0 
         GamePlayFOV = 80f;
 
-        offsetToSpanned = new Vector3(3f, 1f, 0f);
+        offsetToSpanned = new Vector3(0f, 1f, -3f);
 
         if(turnSpeed == 0f)
         {
@@ -151,17 +151,16 @@ public class CameraScrıpt : MonoBehaviour
         bool spanned = false;
         while(!spanned)
         {
-            if (Vector3.Distance(transform.position, spanPosition + offsetToSpanned) > 0.05f)
+            float distanceToSpan = Vector3.Distance(transform.position, spanPosition + offsetToSpanned);
+            if (distanceToSpan > 0.5f)
             {
                 transform.position = Vector3.Slerp(transform.position, spanPosition + offsetToSpanned, turnSpeed / 150f);
 
-
-                if(Vector3.Distance(transform.position, spanPosition + offsetToSpanned) < 5f)
+                //if(distanceToSpan < 5f)
                 {
                     var targetRotation = Quaternion.LookRotation(spanPosition - transform.position);
-                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, turnSpeed / 50f);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 1f / distanceToSpan);
                 }
-
 
             }
             else
@@ -171,6 +170,8 @@ public class CameraScrıpt : MonoBehaviour
 
             yield return new WaitForEndOfFrame();
         }
+
+        offsetToSpanned = transform.position - spanPosition;
 
         camState = CameraState.Spanned;
         StopCoroutine(camMovement);

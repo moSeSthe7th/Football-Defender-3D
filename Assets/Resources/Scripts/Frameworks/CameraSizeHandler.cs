@@ -8,8 +8,6 @@ public class CameraSizeHandler
     Vector2 fixedSize = new Vector2(1125, 2436);
     Vector2 deviceSize = new Vector2(Screen.width, Screen.height);
 
-    //Fixed postion  
-    Vector3 fixedPos = new Vector3(0f,1300,-1050);
 
     //fixed fof value (field of view)
     int fixedFof = 60;
@@ -39,7 +37,7 @@ public class CameraSizeHandler
 
         //Ratio ile fof dogru orantili
         //fixedScreenRatio * currentFof = currScreenRatio * fixedFof
-        int fof = (int)((screenRatio * fixedFof) / fixedScreenRatio);
+        int fof = (int)((screenRatio * 1.18f * fixedFof) / fixedScreenRatio);
 
         //if field of view is not on presetted bounderies 
         if (fof > maxFof)
