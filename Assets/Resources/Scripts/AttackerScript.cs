@@ -12,9 +12,6 @@ public class AttackerScript : MonoBehaviour
     float ballY;
 
     bool isTackled;
-    Rigidbody rb;
-
-    UIManager uIManager;
 
     Animator attackerAnimator;
 
@@ -22,18 +19,29 @@ public class AttackerScript : MonoBehaviour
 
     void Start()
     {
+
         attackerAnimator = GetComponent<Animator>();
-        uIManager = FindObjectOfType(typeof(UIManager)) as UIManager;    
         DataScript.totalAttackerCount++;
         ball = transform.GetChild(0).gameObject;
         dribblePointNo = 0;
-        //CloseRagdollPhysics();
+        
         ballY = ball.transform.position.y;
         isTackled = false;
         dribblePoints = transform.GetChild(1).GetComponent<DribblePoints>().GetDribblePoints();
+
+        OpenColliders();
+
+        InputEventListener.inputEvent.onTouchStarted += StartRunning;        
+    }
+
+    void StartRunning(Vector2 touchPos)
+    {
         StartCoroutine(DribbleTheBall());
-        rb = GetComponent<Rigidbody>();
-        
+    }
+
+    void OnDestroy()
+    {
+        InputEventListener.inputEvent.onTouchStarted -= StartRunning;
     }
 
     IEnumerator DribbleTheBall()
@@ -47,12 +55,15 @@ public class AttackerScript : MonoBehaviour
         if (!isTackled)
         {
             ball.transform.parent = null;
+
             while (Vector3.SqrMagnitude(ball.transform.position - shootPos) > 0.5f)
             {
                 SendBallToGoal();
                 yield return new WaitForSecondsRealtime(0.01f);
             }
-            uIManager.GameOver();
+
+            //uIManager.GameOver();
+
             attackerAnimator.SetBool("isAttackerWon", true);
         }
            
@@ -91,20 +102,45 @@ public class AttackerScript : MonoBehaviour
 
     public void Tackled(Vector3 tacklePos)
     {
-        isTackled = true;
-        DataScript.tackledAttackerCount++;
-
-        if(DataScript.tackledAttackerCount >= DataScript.totalAttackerCount)
+        if(isTackled == false)
         {
-            DataScript.isLevelPassed = true;
-            uIManager.LevelPassed();
-        }
-        OpenRagdollPhysics(tacklePos);
-        
+            isTackled = true;
+            ApplyTackleForce(tacklePos);
+            //OpenRagdollPhysics();
+        }        
     }
     
-    void OpenRagdollPhysics(Vector3 tacklePos)
+    void OpenColliders()
     {
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+
+        foreach (Collider collider in colliders)
+        {
+            collider.isTrigger = false;
+        }
+
+    }
+
+    void ApplyTackleForce(Vector3 tacklePos)
+    {
+        attackerAnimator.enabled = false;
+        transform.parent = null;
+
+        Rigidbody[] rigidbodies = GetComponentsInChildren<Rigidbody>();
+
+        foreach (Rigidbody rigidbody in rigidbodies)
+        {
+            rigidbody.useGravity = true;
+
+            //this is for this game only!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            rigidbody.AddExplosionForce(1250f, tacklePos, 100f, 20f);
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        }
+    }
+
+    void OpenRagdollPhysics()
+    {
+        attackerAnimator.enabled = false;
         transform.parent = null;
 
         Collider[] colliders = GetComponentsInChildren<Collider>();
@@ -119,15 +155,8 @@ public class AttackerScript : MonoBehaviour
         {
             rigidbody.useGravity = true;
 
-            //this is for this game only!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            rigidbody.AddExplosionForce(3000f, tacklePos, 300f, 300f);
-            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
             //rigidbody.isKinematic = false;
         }
-        GetComponent<Animator>().enabled = false;
-
-        
         
     }
 
