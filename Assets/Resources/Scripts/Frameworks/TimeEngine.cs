@@ -11,8 +11,12 @@ public class TimeEngine : MonoBehaviour
     [SerializeField]
     public static float reciprocalFixedDeltaTime; // 1f / fixedDeltaTime
 
+    public static float gameSpeed;
+
     void Start()
     {
+        DefaultSpeed();
+
         reciprocalFixedDeltaTime = 1f / Time.fixedDeltaTime; // Cache the reciprocal
         frameCounter = 0;
         fixedFrameCounter = 0;
@@ -35,4 +39,24 @@ public class TimeEngine : MonoBehaviour
         Debug.Log("Fixed Update frame : " + frameCounter);
 #endif
     }
+
+    public static void SpeedDown(float amount)
+    {
+        if (Time.timeScale - amount >= 0f)
+            Time.timeScale -= amount;
+        else
+            Time.timeScale = 0f;
+    }
+
+    public static void SpeedUp(float amount)
+    {
+        Time.timeScale += amount;
+    }
+
+    public static void DefaultSpeed()
+    {
+        Time.timeScale = gameSpeed;
+    }
+
+
 }

@@ -4,19 +4,20 @@ using UnityEngine;
 
 public class AttackerScript : MonoBehaviour
 {
+    Animator attackerAnimator;
+
     GameObject ball;
+    float ballY;
+
     Transform[] dribblePoints;
     int dribblePointNo;
-
     Vector3 dribbleTo;
-    float ballY;
 
     bool isTackled;
 
-    Animator attackerAnimator;
+    Transform net;
 
-    public Vector3 shootPos;
-
+    public float attackerSpeed;
     void Start()
     {
 
@@ -28,51 +29,61 @@ public class AttackerScript : MonoBehaviour
         ballY = ball.transform.position.y;
         isTackled = false;
         dribblePoints = transform.GetChild(1).GetComponent<DribblePoints>().GetDribblePoints();
+        if (!net)
+            net = GameObject.Find("Net_01").transform;
 
         OpenColliders();
-
-        InputEventListener.inputEvent.onTouchStarted += StartRunning;        
+        attackerSpeed = 3f;
+        DataScript.onGameStarted += StartRunning;
+        //InputEventListener.inputEvent.onTouchStarted += StartRunning;        
     }
 
-    void StartRunning(Vector2 touchPos)
+    void StartRunning()
     {
         StartCoroutine(DribbleTheBall());
     }
 
     void OnDestroy()
     {
-        InputEventListener.inputEvent.onTouchStarted -= StartRunning;
+        DataScript.onGameStarted -= StartRunning;
     }
 
     IEnumerator DribbleTheBall()
     {
-        while (dribblePointNo < dribblePoints.Length && !isTackled && !DataScript.isGameOver)
+        //Wait until ball than start dribble
+        yield return new WaitUntil(() => ball.transform.parent == this.transform);
+
+        attackerAnimator.SetBool("isGameStarted", true);
+        while (dribblePointNo < dribblePoints.Length && !isTackled/* && !DataScript.isGameOver*/)
         {
             DribbleWithBall();
-            yield return new WaitForSecondsRealtime(0.01f);
+            yield return new WaitForEndOfFrame();
         }
 
         if (!isTackled)
         {
+            //if attacker is stayed left on the net play attackerKickMirrored
+            if(net.position.x - transform.position.x > 0f)
+                attackerAnimator.SetBool("isAttackerWon", true);
+            else
+                attackerAnimator.SetBool("isAttackerWonMirror", true);
+
+            yield return new WaitForSeconds(0.7f); //kick animation ends after 0.7 sec approx. Could set animation event will be much more accurate
+
             ball.transform.parent = null;
-
-            while (Vector3.SqrMagnitude(ball.transform.position - shootPos) > 0.5f)
-            {
-                SendBallToGoal();
-                yield return new WaitForSecondsRealtime(0.01f);
-            }
-
-            //uIManager.GameOver();
-
-            attackerAnimator.SetBool("isAttackerWon", true);
+             
+            SendBallToGoal();
+            DataScript.goalCount++;
         }
+
+        StopCoroutine(DribbleTheBall());
            
     }
 
     void SendBallToGoal()
     {
-        ball.transform.Rotate(new Vector3(-75f, 0, 0));
-        ball.transform.position = Vector3.MoveTowards(ball.transform.position, shootPos, 1f);
+        ball.GetComponent<Rigidbody>().AddForce((net.position - ball.transform.position) * 3f, ForceMode.VelocityChange);
+        ball.GetComponent<Rigidbody>().AddTorque((net.position - ball.transform.position) * 3f, ForceMode.VelocityChange);
     }
 
     void DribbleWithBall()
@@ -80,13 +91,12 @@ public class AttackerScript : MonoBehaviour
         dribbleTo = dribblePoints[dribblePointNo].position;
         dribbleTo.y = ballY;
 
-        Quaternion targetRotation = Quaternion.LookRotation(ball.transform.position - transform.position);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 40f * Time.deltaTime);
-        transform.position = Vector3.MoveTowards(transform.position, ball.transform.position, 0.1f);
-
         ball.transform.Rotate(new Vector3(-40f, 0, 0));
-        ball.transform.position = Vector3.MoveTowards(transform.position, dribbleTo, 0.4f);
+        ball.transform.position = Vector3.MoveTowards(transform.position, dribbleTo, attackerSpeed * 2f * Time.deltaTime);
 
+        Quaternion targetRotation = Quaternion.LookRotation(ball.transform.position - transform.position);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 5f * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, ball.transform.position, attackerSpeed * Time.deltaTime);
 
         isReachedDribblePoint();
     }
@@ -154,8 +164,6 @@ public class AttackerScript : MonoBehaviour
         foreach (Rigidbody rigidbody in rigidbodies)
         {
             rigidbody.useGravity = true;
-
-            //rigidbody.isKinematic = false;
         }
         
     }
@@ -178,7 +186,6 @@ public class AttackerScript : MonoBehaviour
             if (rigidbody.gameObject != this.gameObject)
             {
                 rigidbody.useGravity = false;
-                //rigidbody.isKinematic = true;
             }
         }
     }

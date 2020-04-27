@@ -16,6 +16,7 @@ public class InputToBezierRoute : IDisposable
     public bool routeComplete = false; //defender will check this routeComplete flag in order to start sliding
 
     int curveCount = 0;// allow only one curve for now
+    bool didGameStarted = false;
 
     public InputToBezierRoute(Vector3 startPos)
     {
@@ -25,6 +26,7 @@ public class InputToBezierRoute : IDisposable
 
         touchPositions = new List<Vector3>();
 
+        DataScript.onGameStarted += gameStarted;
         //Set input events. This void will be called when input even occurs
         InputEventListener.inputEvent.onTouchStarted += OnTouchStarted;
         InputEventListener.inputEvent.onTouch += OnTouch;
@@ -33,6 +35,8 @@ public class InputToBezierRoute : IDisposable
 
     public void Dispose()
     {
+        DataScript.onGameStarted -= gameStarted;
+
         InputEventListener.inputEvent.onTouchStarted -= OnTouchStarted;
         InputEventListener.inputEvent.onTouch -= OnTouch;
         InputEventListener.inputEvent.onTouchEnd -= OnTouchEnded;
@@ -40,9 +44,14 @@ public class InputToBezierRoute : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    void gameStarted()
+    {
+        didGameStarted = true;
+    }
+
     void OnTouchStarted(Vector2 touchPos)
     {
-        if(!DataScript.isGameOver && curveCount <= 0)
+        if(curveCount <= 0 && didGameStarted)
         {
             touchPositions.Clear();
             bezierControlPoints.Clear();

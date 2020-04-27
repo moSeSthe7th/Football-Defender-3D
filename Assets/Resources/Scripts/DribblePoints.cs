@@ -7,7 +7,6 @@ public class DribblePoints : MonoBehaviour
 
     Transform[] dribblePoints;
 
-
     public Transform[] GetDribblePoints()
     {
         transform.position = gameObject.transform.parent.position;

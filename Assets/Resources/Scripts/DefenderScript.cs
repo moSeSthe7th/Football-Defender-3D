@@ -8,16 +8,17 @@ public class DefenderScript : MonoBehaviour
 {
     Animator animator;
     InputToBezierRoute bezierCalculator;
-   
     List<Vector3> defenderSlidePositions;
-    UIManager uIManager;
+
+    VibrationHandler vibration;
 
     void Start()
     {
-        uIManager = FindObjectOfType(typeof(UIManager)) as UIManager;
         defenderSlidePositions = new List<Vector3>();
-        
         animator = GetComponentInChildren<Animator>();
+        vibration = new VibrationHandler();
+
+        DataScript.totalDefenderCount++;
 
         bezierCalculator = new InputToBezierRoute(transform.position);
     }
@@ -41,14 +42,9 @@ public class DefenderScript : MonoBehaviour
         if (other.gameObject.tag == "Attacker")
         {
             other.GetComponent<AttackerScript>().Tackled(transform.position);
-
             DataScript.tackledAttackerCount++;
 
-            if (DataScript.tackledAttackerCount >= DataScript.totalAttackerCount)
-            {
-                DataScript.isLevelPassed = true;
-                uIManager.LevelPassed();
-            }
+            vibration.vibrate(2);
         }
       
     }
@@ -60,33 +56,31 @@ public class DefenderScript : MonoBehaviour
 
     IEnumerator SlidingTackle()
     {
-       
         animator.SetBool("isTackling", true);
 
-        float slideSpeed = 0.5f; //Vector3.SqrMagnitude(slideTo) / 500f;
+        float slideSpeed = 15f; //Vector3.SqrMagnitude(slideTo) / 500f;
 
         for (int i = 0;i < defenderSlidePositions.Count-1; i++)
         {
-            while (Vector3.SqrMagnitude(defenderSlidePositions[i] - transform.position) > 0.2f)
+            while (Vector3.SqrMagnitude(defenderSlidePositions[i] - transform.position) > 0.01f)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(defenderSlidePositions[i] - transform.position);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 40f * Time.deltaTime);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, slideSpeed * Time.deltaTime);
 
-                transform.position = Vector3.MoveTowards(transform.position, defenderSlidePositions[i], slideSpeed);
-                yield return new WaitForSecondsRealtime(0.01f);
+                transform.position = Vector3.MoveTowards(transform.position, defenderSlidePositions[i], slideSpeed * Time.deltaTime);
+                yield return new WaitForEndOfFrame();
             }
         }
 
         animator.SetBool("isTackling", false);
         animator.SetBool("isTackleEnded", true);
 
-        yield return new WaitForSecondsRealtime(0.5f);
+        DataScript.slidedDefenderCount++;
 
-        DataScript.isGameOver = true;
+        yield return new WaitForEndOfFrame();//WaitForSeconds(0.1f);
 
         if (!DataScript.isLevelPassed)
         {
-            uIManager.GameOver();
             animator.SetBool("isLost", true);
         }
         else
