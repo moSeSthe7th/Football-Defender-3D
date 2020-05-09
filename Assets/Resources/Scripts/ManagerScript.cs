@@ -35,6 +35,7 @@ public class ManagerScript : MonoBehaviour
 
         startingBall = transform.GetChild(0).gameObject;
         cam = Camera.main.GetComponent<CameraScrıpt>();
+        cam.followedObject = primaryMap.GetComponentInChildren<DefenderScript>().transform;
 
         StartCoroutine(GameStartCorountine());
     }
@@ -49,6 +50,9 @@ public class ManagerScript : MonoBehaviour
        }
     }
 
+    //Finishes the game if following conditions are true
+    //Win if all attackers are tackled
+    //Lose if all defenders are slided and all attackers are not tackled
     void CheckState()
     {
         if (DataScript.tackledAttackerCount >= DataScript.totalAttackerCount && DataScript.slidedDefenderCount >= DataScript.totalDefenderCount && !DataScript.isLevelPassed)
@@ -64,9 +68,16 @@ public class ManagerScript : MonoBehaviour
             }
             else if (DataScript.goalCount == (DataScript.totalAttackerCount - DataScript.tackledAttackerCount))
             {
-                NormalizeSpeed();
                 LevelFailed();
             }
+        }
+        else if(DataScript.totalAttackerCount == DataScript.tackledAttackerCount)
+        {
+            LevelPassed();
+        }
+        else if (DataScript.goalCount != 0 && DataScript.goalCount == (DataScript.totalAttackerCount - DataScript.tackledAttackerCount))
+        {
+            LevelFailed();
         }
     }
 
@@ -85,9 +96,10 @@ public class ManagerScript : MonoBehaviour
     {
         Debug.Log("Level Passed");
 
+        NormalizeSpeed();
+
         Transform defender = primaryMap.GetComponentInChildren<DefenderScript>().transform;
         cam.SpanTo(defender);
-        //defender.gameObject.SetActive(false);
 
         DataScript.isLevelPassed = true;
 
@@ -108,6 +120,8 @@ public class ManagerScript : MonoBehaviour
     void LevelFailed()
     {
         Debug.Log("Level Failed");
+
+        NormalizeSpeed();
 
         Transform attacker = primaryMap.GetComponentInChildren<AttackerScript>().transform;
         cam.SpanTo(attacker);
@@ -132,7 +146,7 @@ public class ManagerScript : MonoBehaviour
         yield return new WaitForSeconds(0.8f);
         //wait a little to see animation than rotate
         cam.RotateToGamePlayRotation();
-
+          
         yield return new WaitUntil(() => uIManager.counted == true); // wait until count down to end
 
         DataScript.ChangeState(DataScript.GameState.onGame);

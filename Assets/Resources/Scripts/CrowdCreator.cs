@@ -13,26 +13,32 @@ public class CrowdCreator : MonoBehaviour
 
     GameObject watcherPrefab;
     List<GameObject> crowd;
+    List<Transform> seats;
 
     Mesh seatingMesh;
     Vector3 actualScale;
+
+    LayerMask layerMask;
 
     void Start()
     {
 
         seatingMesh = GetComponent<MeshFilter>().mesh;
         actualScale = Vector3.Scale(seatingMesh.bounds.size, transform.localScale);
-
+        Debug.Log("actualScale : " + actualScale);
         float seatArea = (actualScale.x) * (actualScale.z);
         WatcherCount = (int)seatArea / 2;
         //Debug.Log(actualScale);
 
         watcherPrefab = (GameObject)Resources.Load("Prefabs/Watcher");
         crowd = new List<GameObject>(WatcherCount);
+        seats = new List<Transform>();
 
-        CreateWatchers(WatcherCount);
+        layerMask = layerMask | (1 << gameObject.layer);
 
-        PlaceWatchers();
+        //CreateWatchers(WatcherCount);
+        CreateAndAssignSeatPositions();
+        //PlaceWatchers();
 
     }
 
@@ -51,6 +57,48 @@ public class CrowdCreator : MonoBehaviour
             watcher.transform.localScale *= 0.5f;
             crowd.Add(watcher);
         }
+    }
+
+    /// <summary>
+    /// Create seat positions inside seating area. Current stadium have this positions in 0.2x 0.8x and 0.05z 0.55z positions of seating area object
+    /// </summary>
+    void CreateAndAssignSeatPositions()
+    {
+        float rowCount = (actualScale.x / (actualScale.x / 10f)) + (actualScale.x / (actualScale.x / 10f));
+        float columnCount = (actualScale.z / 2.1f) + (actualScale.z / 10f);
+        Debug.Log("rowCount : " + rowCount + " . columnCount : " + columnCount);
+
+        //Start from left bottom corner of seating area and increase z position of z at each ray iteration. That way we will calculate rows of seating area
+        //if ray hits to a different height from previous that means there is a new seating row we will add that to rows
+        bool calculated = false;
+
+        float xPos = (actualScale.x / (actualScale.x / 10f));
+        float yPos = 0.85f;
+        float zPos = (actualScale.z / 2.1f);
+
+        Vector3 currentPosition = new Vector3(xPos,yPos,zPos);
+
+        GameObject seat = new GameObject("seat");
+        seat.transform.parent = this.transform;
+        seat.transform.localPosition = currentPosition;
+
+        while(!calculated)
+        {
+            RaycastHit rayHit;
+            Vector3 origin = new Vector3(currentPosition.x, currentPosition.y, currentPosition.z);
+           
+            //org = origin;
+            if (Physics.Raycast(origin, Vector3.down, out rayHit, 10f,layerMask))
+            {
+
+            }
+            else // means we exited seating area set as calculated
+            {
+                calculated = true;
+            }
+        }
+
+
     }
 
     /// <summary>

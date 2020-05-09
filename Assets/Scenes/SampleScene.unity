@@ -288,6 +288,21 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 632150365912398949, guid: 6815a9f033752fa4e913136c33ce0a63,
+        type: 3}
+      propertyPath: m_Size.y
+      value: 0.9599999
+      objectReference: {fileID: 0}
+    - target: {fileID: 632150365912398949, guid: 6815a9f033752fa4e913136c33ce0a63,
+        type: 3}
+      propertyPath: m_Center.y
+      value: -0.43
+      objectReference: {fileID: 0}
+    - target: {fileID: 632150365912398949, guid: 6815a9f033752fa4e913136c33ce0a63,
+        type: 3}
+      propertyPath: m_Center.z
+      value: 8.810824e-16
+      objectReference: {fileID: 0}
     - target: {fileID: 4225800737874359602, guid: 6815a9f033752fa4e913136c33ce0a63,
         type: 3}
       propertyPath: m_Enabled
@@ -337,6 +352,26 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6257731202540872131, guid: 6815a9f033752fa4e913136c33ce0a63,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 305750028714804503, guid: 6815a9f033752fa4e913136c33ce0a63,
+        type: 3}
+      propertyPath: m_Center.y
+      value: -0.44470596
+      objectReference: {fileID: 0}
+    - target: {fileID: 305750028714804503, guid: 6815a9f033752fa4e913136c33ce0a63,
+        type: 3}
+      propertyPath: m_Size.y
+      value: 1.0519905
+      objectReference: {fileID: 0}
+    - target: {fileID: 305750028714804503, guid: 6815a9f033752fa4e913136c33ce0a63,
+        type: 3}
+      propertyPath: m_Center.z
+      value: -4.981096e-16
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6815a9f033752fa4e913136c33ce0a63, type: 3}
@@ -417,7 +452,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GameSpeed: 1
-  useCameraSizeHandler: 1
+  useCameraSizeHandler: 0
 --- !u!114 &542991724
 MonoBehaviour:
   m_ObjectHideFlags: 0

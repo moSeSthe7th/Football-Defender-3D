@@ -31,7 +31,6 @@ public class BallScript : MonoBehaviour
         GetComponent<MeshRenderer>().enabled = true;
 
         StartCoroutine(Fall());
-
     }
 
     IEnumerator Fall()

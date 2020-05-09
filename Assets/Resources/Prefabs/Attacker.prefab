@@ -1411,7 +1411,7 @@ Animator:
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: f2ea20627869f1343a0e573ea1788fcf, type: 3}
   m_Controller: {fileID: 9100000, guid: fb896495754c0474e863e4b46a6a2541, type: 2}
-  m_CullingMode: 0
+  m_CullingMode: 2
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
@@ -1443,8 +1443,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.48, y: 1.9283683, z: 0.824774}
-  m_Center: {x: -0, y: 0.99081576, z: -0.08761299}
+  m_Size: {x: 1.2532693, y: 1.8479027, z: 0.65392125}
+  m_Center: {x: -0.0032687783, y: 0.9505829, z: -0.0021865815}
 --- !u!54 &1099628258
 Rigidbody:
   m_ObjectHideFlags: 0

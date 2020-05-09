@@ -17,7 +17,7 @@ public class AttackerScript : MonoBehaviour
 
     Transform net;
 
-    public float attackerSpeed;
+    public float attackerSpeed = 3f;
     void Start()
     {
 
@@ -33,9 +33,7 @@ public class AttackerScript : MonoBehaviour
             net = GameObject.Find("Net_01").transform;
 
         OpenColliders();
-        attackerSpeed = 3f;
         DataScript.onGameStarted += StartRunning;
-        //InputEventListener.inputEvent.onTouchStarted += StartRunning;        
     }
 
     void StartRunning()

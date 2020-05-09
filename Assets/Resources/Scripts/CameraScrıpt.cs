@@ -5,11 +5,14 @@ using UnityEngine;
 public class CameraScrıpt : MonoBehaviour
 {
     Camera thisCam;
+    public Transform followedObject;
+    Vector3 offsetToFollowed;
 
     enum CameraState
     {
         OnHome,
         OnGame,
+        OnCorountine,
         Spanned
     }
 
@@ -54,7 +57,21 @@ public class CameraScrıpt : MonoBehaviour
     float spannedTime;
     private void LateUpdate()
     {
-        if(camState == CameraState.Spanned)
+        if(camState == CameraState.OnGame)
+        {
+            Quaternion targetRot = transform.rotation;
+            //Debug.Log(targetRot);
+            targetRot.y = /*(transform.rotation * Quaternion.AngleAxis(*/(/* transform.rotation.y - */followedObject.position.x) * Time.deltaTime;//, Vector3.up)).y;
+            //Debug.Log(targetRot);
+            //transform.rotation = Quaternion.RotateTowards(transform.rotation,targetRot, turnSpeed * Time.deltaTime);
+
+            Vector3 targetPos = transform.position;//followedObject.position + offsetToFollowed;
+            targetPos.z = followedObject.position.z + offsetToFollowed.z;
+            targetPos.z = (targetPos.z < GamePlayPosition.z) ? GamePlayPosition.z : targetPos.z;
+            transform.position = targetPos;
+           
+        }
+        else if(camState == CameraState.Spanned)
         {
             Quaternion mouseRotYAxis = Quaternion.AngleAxis(3f * turnSpeed * Time.deltaTime, Vector3.up);
             mouseRotYAxis = Quaternion.Euler(0f, mouseRotYAxis.eulerAngles.y, 0f);
@@ -85,26 +102,26 @@ public class CameraScrıpt : MonoBehaviour
 
     public void SpanTo(Transform character)
     {
-        Debug.Log(character.position);
-
         if (camMovement == null)
-            camMovement = StartCoroutine(SpanToPosition(character.position));
+            camMovement = StartCoroutine(SpanToPosition(character));
         else
         {
             Debug.LogWarning("camMovement is on use stopping other corountine");
             StopCoroutine(camMovement);
-            camMovement = StartCoroutine(SpanToPosition(character.position));
+            camMovement = StartCoroutine(SpanToPosition(character));
         }
     }
 
     IEnumerator RotateOnStart()
     {
+        camState = CameraState.OnCorountine;
+
         bool rotated = false;
         bool positioned = false;
         bool fovSetted = false;
         while(!rotated || !positioned || !fovSetted)
         {
-            if (Vector3.Distance(transform.position, GamePlayPosition) > 1f) //!Mathf.Approximately(transform.position.sqrMagnitude, GamePlayPosition.sqrMagnitude))
+            if (Vector3.Distance(transform.position, GamePlayPosition) > 2f) //!Mathf.Approximately(transform.position.sqrMagnitude, GamePlayPosition.sqrMagnitude))
             {
                 transform.position = Vector3.Lerp(transform.position, GamePlayPosition, turnSpeed / 100f);
             }
@@ -114,7 +131,7 @@ public class CameraScrıpt : MonoBehaviour
                 positioned = true;
             }
 
-            if (Vector3.Distance(transform.rotation.eulerAngles, GamePlayRotation.eulerAngles) > 1f)//!Mathf.Approximately(transform.rotation.eulerAngles.sqrMagnitude, GamePlayRotation.eulerAngles.sqrMagnitude))
+            if (Vector3.Distance(transform.rotation.eulerAngles, GamePlayRotation.eulerAngles) > 5f)//!Mathf.Approximately(transform.rotation.eulerAngles.sqrMagnitude, GamePlayRotation.eulerAngles.sqrMagnitude))
             {
                 transform.rotation = Quaternion.Slerp(transform.rotation, GamePlayRotation, turnSpeed / 100f);
             }
@@ -124,7 +141,7 @@ public class CameraScrıpt : MonoBehaviour
                 rotated = true;
             }
 
-            if(Mathf.Abs(thisCam.fieldOfView - GamePlayFOV) > 1f)
+            if(Mathf.Abs(thisCam.fieldOfView - GamePlayFOV) > 2f)
             {
                 thisCam.fieldOfView = Mathf.Lerp(thisCam.fieldOfView, GamePlayFOV, turnSpeed / 100f);
             }
@@ -137,6 +154,8 @@ public class CameraScrıpt : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
 
+        offsetToFollowed = transform.position - followedObject.position;
+
         camState = CameraState.OnGame;
         StopCoroutine(camMovement);
         camMovement = null;
@@ -144,22 +163,24 @@ public class CameraScrıpt : MonoBehaviour
         yield return null;
     }
      
-    IEnumerator SpanToPosition(Vector3 spanPosition)
+    IEnumerator SpanToPosition(Transform spannedObj)
     {
-        spannedPosition = spanPosition;
+        camState = CameraState.OnCorountine;
+
+        float downModifier = 1f;
 
         bool spanned = false;
         while(!spanned)
         {
-            float distanceToSpan = Vector3.Distance(transform.position, spanPosition + offsetToSpanned);
-            if (distanceToSpan > 0.5f)
+            float distanceToSpan = Vector3.Distance(transform.position, spannedObj.position + (Vector3.down * downModifier) /*+ offsetToSpanned*/);
+            if (distanceToSpan > 3f)
             {
-                transform.position = Vector3.Slerp(transform.position, spanPosition + offsetToSpanned, turnSpeed / 150f);
+                transform.position = Vector3.Lerp(transform.position, spannedObj.position + (Vector3.down * downModifier) /*+ offsetToSpanned*/, turnSpeed / 150f);
 
                 //if(distanceToSpan < 5f)
                 {
-                    var targetRotation = Quaternion.LookRotation(spanPosition - transform.position);
-                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 1f / distanceToSpan);
+                    var targetRotation = Quaternion.LookRotation(spannedObj.position - transform.position);
+                    transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, 1f / distanceToSpan);
                 }
 
             }
@@ -171,8 +192,8 @@ public class CameraScrıpt : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
 
-        offsetToSpanned = transform.position - spanPosition;
-
+        offsetToSpanned = transform.position - spannedObj.position;
+        spannedPosition = spannedObj.position;
         camState = CameraState.Spanned;
         StopCoroutine(camMovement);
         camMovement = null;

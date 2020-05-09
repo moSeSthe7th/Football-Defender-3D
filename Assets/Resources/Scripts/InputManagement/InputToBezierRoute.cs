@@ -3,72 +3,37 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InputToBezierRoute : IDisposable
+public class InputToBezierRoute : InputController
 {
     List<Vector3> bezierControlPoints;
     int controlPointCount;
-    Vector3 startingPosition;
-
-    List<Vector3> touchPositions;
-    bool touchStarted;
 
     public List<Vector3> bezierPoints;
     public bool routeComplete = false; //defender will check this routeComplete flag in order to start sliding
 
-    int curveCount = 0;// allow only one curve for now
-    bool didGameStarted = false;
-
-    public InputToBezierRoute(Vector3 startPos)
+    public InputToBezierRoute(Vector3 startPos) : base(startPos) 
     {
         controlPointCount = 4;
         bezierControlPoints = new List<Vector3>(controlPointCount);
-        startingPosition = startPos;
 
         touchPositions = new List<Vector3>();
-
-        DataScript.onGameStarted += gameStarted;
-        //Set input events. This void will be called when input even occurs
-        InputEventListener.inputEvent.onTouchStarted += OnTouchStarted;
-        InputEventListener.inputEvent.onTouch += OnTouch;
-        InputEventListener.inputEvent.onTouchEnd += OnTouchEnded;
     }
 
-    public void Dispose()
+    protected override void OnTouchStarted(Vector2 touchPos)
     {
-        DataScript.onGameStarted -= gameStarted;
-
-        InputEventListener.inputEvent.onTouchStarted -= OnTouchStarted;
-        InputEventListener.inputEvent.onTouch -= OnTouch;
-        InputEventListener.inputEvent.onTouchEnd -= OnTouchEnded;
-
-        GC.SuppressFinalize(this);
-    }
-
-    void gameStarted()
-    {
-        didGameStarted = true;
-    }
-
-    void OnTouchStarted(Vector2 touchPos)
-    {
-        if(curveCount <= 0 && didGameStarted)
+        if(canPlayerMove)
         {
             touchPositions.Clear();
-            bezierControlPoints.Clear();
 
             touchStarted = true;
             AddTouchPoisition(touchPos);
+
+            bezierControlPoints.Clear();
         }
-       
+
     }
 
-    void OnTouch(Vector2 touchPos)
-    {
-        if(touchStarted)
-            AddTouchPoisition(touchPos);
-    }
-
-    void OnTouchEnded(Vector2 touchPos)
+    protected override void OnTouchEnded(Vector2 touchPos)
     {
 
         if(touchStarted)
@@ -103,29 +68,9 @@ public class InputToBezierRoute : IDisposable
 
             routeComplete = true;
             touchStarted = false;
-            curveCount++;
 
             CreateDebugObject();
         }
-    }
-
-
-    bool AddTouchPoisition(Vector2 touchPos)
-    {
-        Ray ray = Camera.main.ScreenPointToRay(touchPos);
-        RaycastHit raycastHit;
-
-        if (Physics.Raycast(ray, out raycastHit))
-        {
-            if (raycastHit.transform.gameObject.tag == "Pitch")
-            {
-                touchPositions.Add(raycastHit.point);
-                return true;
-            }
-
-        }
-
-        return false;
     }
 
     List<Vector3> SetBezierPoints()
