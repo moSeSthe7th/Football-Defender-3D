@@ -104,7 +104,6 @@ public class DefenderScript : MonoBehaviour
             transform.position = Vector3.Lerp(transform.position, inputController.targetTransform.position, slideSpeed / 10f);
             transform.rotation = Quaternion.Slerp(transform.rotation, inputController.targetTransform.rotation, slideSpeed / 10f); //inputController.targetTransform.rotation;
 
-
             yield return new WaitForEndOfFrame();
         }
 #else

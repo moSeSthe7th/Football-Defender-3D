@@ -6,9 +6,13 @@ public class AttackerScript : MonoBehaviour
 {
     Animator attackerAnimator;
 
+    public Transform cubeReplica;
+    Vector3 replicaPosition;
+
     GameObject ball;
     float ballY;
 
+    Rigidbody[] rigidbodies;
     Transform[] dribblePoints;
     int dribblePointNo;
     Vector3 dribbleTo;
@@ -18,7 +22,13 @@ public class AttackerScript : MonoBehaviour
     Transform net;
 
     public float attackerSpeed = 3f;
-    void Start()
+
+    Coroutine dribbleBall;
+    Coroutine disposeCube;
+
+    SkinnedMeshRenderer attackerRenderer;
+
+    void OnEnable()
     {
 
         attackerAnimator = GetComponent<Animator>();
@@ -29,21 +39,40 @@ public class AttackerScript : MonoBehaviour
         ballY = ball.transform.position.y;
         isTackled = false;
         dribblePoints = transform.GetChild(1).GetComponent<DribblePoints>().GetDribblePoints();
+
+        rigidbodies = GetComponentsInChildren<Rigidbody>();
+        attackerRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
+
         if (!net)
             net = GameObject.Find("Net_01").transform;
+
+        if (cubeReplica == null)
+            foreach(Transform cubeRep in GetComponentsInChildren<Transform>())
+            {
+                if (cubeRep.name.ToLower().Contains("cubeman"))
+                    cubeReplica = cubeRep;
+            }
+        cubeReplica.gameObject.SetActive(false);
 
         OpenColliders();
         DataScript.onGameStarted += StartRunning;
     }
 
-    void StartRunning()
-    {
-        StartCoroutine(DribbleTheBall());
-    }
-
     void OnDestroy()
     {
         DataScript.onGameStarted -= StartRunning;
+    }
+
+    void StartRunning()
+    {
+        if(dribbleBall == null)
+        {
+            dribbleBall = StartCoroutine(DribbleTheBall());
+        }
+        else
+        {
+            Debug.LogError("Attacker coruntine is not null");
+        }
     }
 
     IEnumerator DribbleTheBall()
@@ -66,6 +95,7 @@ public class AttackerScript : MonoBehaviour
             else
                 attackerAnimator.SetBool("isAttackerWonMirror", true);
 
+            //wait for kick
             yield return new WaitForSeconds(0.7f); //kick animation ends after 0.7 sec approx. Could set animation event will be much more accurate
 
             ball.transform.parent = null;
@@ -74,7 +104,7 @@ public class AttackerScript : MonoBehaviour
             DataScript.goalCount++;
         }
 
-        StopCoroutine(DribbleTheBall());
+        StopCoroutine(dribbleBall);
            
     }
 
@@ -108,12 +138,44 @@ public class AttackerScript : MonoBehaviour
         
     }
 
+    IEnumerator DisposeCube()
+    {
+        replicaPosition = cubeReplica.position;//set replica position and wait a frame 
+        yield return new WaitForEndOfFrame();
+
+        //if position not changed continue
+        while (didMoved(replicaPosition))
+        {
+            replicaPosition = cubeReplica.position;
+            yield return new WaitForEndOfFrame();
+        }
+
+        cubeReplica.gameObject.SetActive(true);
+        attackerRenderer.enabled = false;
+
+        StopCoroutine(disposeCube);
+    }
+
+    bool didMoved(Vector3 oldPosition)
+    {
+        if (Vector3.Distance(oldPosition, cubeReplica.position) < 0.01f)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     public void Tackled(Vector3 tacklePos)
     {
         if(isTackled == false)
         {
             isTackled = true;
             ApplyTackleForce(tacklePos);
+
+            StopCoroutine(dribbleBall);
+
+            disposeCube = StartCoroutine(DisposeCube());
             //OpenRagdollPhysics();
         }        
     }
@@ -134,17 +196,17 @@ public class AttackerScript : MonoBehaviour
         attackerAnimator.enabled = false;
         transform.parent = null;
 
-        Rigidbody[] rigidbodies = GetComponentsInChildren<Rigidbody>();
-
         foreach (Rigidbody rigidbody in rigidbodies)
         {
             rigidbody.useGravity = true;
 
             //this is for this game only!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            rigidbody.AddExplosionForce(1250f, tacklePos, 100f, 20f);
+            rigidbody.AddExplosionForce(750f, tacklePos, 50f, 100f);
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
     }
+
+   
 
     void OpenRagdollPhysics()
     {

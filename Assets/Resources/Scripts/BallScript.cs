@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BallScript : MonoBehaviour
@@ -9,7 +8,7 @@ public class BallScript : MonoBehaviour
     Vector3 initialPosition;
 
     public bool placed;
-    private void Start()
+    private void OnEnable()
     {
         rb = GetComponent<Rigidbody>();
         rb.isKinematic = true; //at start set as kinematic
@@ -36,7 +35,7 @@ public class BallScript : MonoBehaviour
     IEnumerator Fall()
     {
         rb.isKinematic = false;
-        rb.AddExplosionForce(750f, transform.position, 200f);
+        rb.AddExplosionForce(750f, transform.position, 200f, -25f);
 
         while (Vector3.Distance(transform.position, initialPosition) > 0.05f )
         {

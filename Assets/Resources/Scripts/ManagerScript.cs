@@ -7,7 +7,7 @@ using UnityEngine;
 public class ManagerScript : MonoBehaviour
 {
     GameObject primaryMap;
-
+    CrowdController crowdController;
     UIManager uIManager;
     CameraScrıpt cam;
 
@@ -15,7 +15,7 @@ public class ManagerScript : MonoBehaviour
 
     bool fasted = false;
 
-    void Awake()
+    void Start()
     {
         //Application.targetFrameRate = 30;
         //DataScript.inputLock = false;
@@ -32,6 +32,7 @@ public class ManagerScript : MonoBehaviour
         primaryMap = Instantiate(Resources.Load<GameObject>("Levels/" + DataScript.currentLevel.ToString()), Vector3.zero, Quaternion.identity);
 
         uIManager = FindObjectOfType(typeof(UIManager)) as UIManager;
+        crowdController = FindObjectOfType(typeof(CrowdController)) as CrowdController;
 
         startingBall = transform.GetChild(0).gameObject;
         cam = Camera.main.GetComponent<CameraScrıpt>();
@@ -136,22 +137,46 @@ public class ManagerScript : MonoBehaviour
         {
             yield return new WaitUntil(() => uIManager.pressedPlay == true);
         }
-        //wait just a little before returning and beginning animation
-        yield return new WaitForSeconds(0.5f);
 
+        //wait just a little before returning and beginning animation
+        //yield return new WaitForSeconds(0.5f);
+        
 
         BallScript[] balls = primaryMap.GetComponentsInChildren<BallScript>();
         StartingAnimation(balls);
 
-        yield return new WaitForSeconds(0.8f);
+        yield return new WaitForSeconds(0.2f);
+        StartCoroutine(CountDown());
         //wait a little to see animation than rotate
         cam.RotateToGamePlayRotation();
           
-        yield return new WaitUntil(() => uIManager.counted == true); // wait until count down to end
+        yield return new WaitUntil(() => counted == true); // wait until count down to end
 
         DataScript.ChangeState(DataScript.GameState.onGame);
 
         yield return null;
+    }
+
+    bool counted = false;
+    IEnumerator CountDown()
+    {
+        SpriteToBoards countDownSprites = new SpriteToBoards("LifterSprites/CountDown");
+        countDownSprites.spriteMaps.Reverse();
+
+        int count = 0;
+        while (count < 3)
+        {
+            crowdController.StartLiftingArea(count, countDownSprites.spriteMaps);
+            yield return new WaitForSecondsRealtime(1f);
+            count++;
+        }
+        counted = true;
+        //yield return new WaitForSeconds(1f);
+;
+        //SpriteToBoards GoSprites = new SpriteToBoards("LifterSprites/Go");
+        //crowdController.StartLifting(GoSprites.spriteMaps);
+
+        StopCoroutine(CountDown());
     }
 
     void StartingAnimation(BallScript[] balls)

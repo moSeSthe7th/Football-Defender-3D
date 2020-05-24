@@ -6,6 +6,7 @@ using System;
 public class InputToJoyStick : InputController
 {
     public Transform targetTransform;
+    public float sharpness = 15f;
     bool isStaniory { get; set; }
     bool isInput { get; set; }
     Vector2 touchStartPos;
@@ -81,13 +82,15 @@ public class InputToJoyStick : InputController
         Vector3 movementVec = new Vector3(delta.x, 0f, delta.y);
 
         // Debug.Log("Movement Vector is : " + movementVec + " Position is :" + transform.position);
-        targetTransform.position += movementVec;//  Vector3.Lerp(transform.position, movementVec, speedModifier * Time.deltaTime);
+        //targetTransform.position += movementVec;//  Vector3.Lerp(transform.position, movementVec, speedModifier * Time.deltaTime);
                                           // Debug.Log("New transform position is : " + transform.position); 
 
-        Quaternion targetRotation = Quaternion.LookRotation(movementVec *  10f);
+        Quaternion targetRotation = Quaternion.LookRotation(movementVec);
 
-        targetTransform.rotation = Quaternion.RotateTowards(targetTransform.rotation, targetRotation, 10f);
+        targetTransform.rotation = Quaternion.RotateTowards(targetTransform.rotation, targetRotation, sharpness);
         //transform.rotation = Quaternion.RotateTowards(horizontalRotation, targetRotation, 30f);// * Quaternion.FromToRotation(localAxisToTarget, Vector3.forward) * Quaternion.FromToRotation(localAxisToUp, Vector3.up);
+
+        targetTransform.position += targetTransform.forward.normalized * maxVelocity;
 
         //Quaternion lookRotation = Quaternion.LookRotation(transform.position);
         //transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, rotationSpeed);

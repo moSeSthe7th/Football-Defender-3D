@@ -68,7 +68,7 @@ public class CameraScrıpt : MonoBehaviour
             Vector3 targetPos = transform.position;//followedObject.position + offsetToFollowed;
             targetPos.z = followedObject.position.z + offsetToFollowed.z;
             targetPos.z = (targetPos.z < GamePlayPosition.z) ? GamePlayPosition.z : targetPos.z;
-            transform.position = targetPos;
+            //transform.position = targetPos;
            
         }
         else if(camState == CameraState.Spanned)
@@ -77,10 +77,10 @@ public class CameraScrıpt : MonoBehaviour
             mouseRotYAxis = Quaternion.Euler(0f, mouseRotYAxis.eulerAngles.y, 0f);
 
             offsetToSpanned =/* mouseRotXAxis */ mouseRotYAxis * offsetToSpanned;
-            transform.position = spannedPosition + offsetToSpanned;
+           // transform.position = spannedPosition + offsetToSpanned;
 
             Quaternion targetRotation = Quaternion.LookRotation(spannedPosition - transform.position);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 0.5f);
+          //  transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 0.5f);
 
             spannedTime += Time.deltaTime;
 
@@ -167,15 +167,17 @@ public class CameraScrıpt : MonoBehaviour
     {
         camState = CameraState.OnCorountine;
 
+        yield return new WaitForSeconds(1f);
+
         float downModifier = 1f;
 
         bool spanned = false;
         while(!spanned)
         {
-            float distanceToSpan = Vector3.Distance(transform.position, spannedObj.position + (Vector3.down * downModifier) /*+ offsetToSpanned*/);
-            if (distanceToSpan > 3f)
+            float distanceToSpan = Vector3.Distance(transform.position, spannedObj.position + (Vector3.down * downModifier) + offsetToSpanned);
+            if (distanceToSpan > 1f)
             {
-                transform.position = Vector3.Lerp(transform.position, spannedObj.position + (Vector3.down * downModifier) /*+ offsetToSpanned*/, turnSpeed / 150f);
+                transform.position = Vector3.Lerp(transform.position, spannedObj.position + (Vector3.down * downModifier) + offsetToSpanned, turnSpeed / 150f);
 
                 //if(distanceToSpan < 5f)
                 {
