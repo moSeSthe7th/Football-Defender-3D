@@ -28,7 +28,7 @@ public class FlowToDirection : MonoBehaviour
             transform.position = Vector3.Slerp(transform.position, flowPoint, 0.05f);
             // transform.Rotate(Vector3.right * 10f, 10f, Space.World);
 
-            if (DataScript.GetState() == DataScript.GameState.PassedLevel && (Mathf.Abs(gameObject.transform.position.x) <10f) ||
+            if (DataScript.GetState() == DataScript.GameState.PassedLevel && !isExploded && (Mathf.Abs(gameObject.transform.position.x) <10f) ||
                 (Mathf.Abs(gameObject.transform.position.z) < 15f))//gameObject.transform.position.y <= -2f && !isExploded)
             {
                 if(gameObject.transform.position.y <= -2f && !isExploded)
