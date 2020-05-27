@@ -143,12 +143,17 @@ public class AttackerScript : MonoBehaviour
         replicaPosition = cubeReplica.position;//set replica position and wait a frame 
         yield return new WaitForEndOfFrame();
 
-        //if position not changed continue
-        while (didMoved(replicaPosition))
+        for(int i = 0; i < 5; i++)
         {
             replicaPosition = cubeReplica.position;
             yield return new WaitForEndOfFrame();
         }
+        //if position not changed continue
+        /*while (didMoved(replicaPosition))
+        {
+            replicaPosition = cubeReplica.position;
+            yield return new WaitForEndOfFrame();
+        }*/
 
         cubeReplica.gameObject.SetActive(true);
         attackerRenderer.enabled = false;

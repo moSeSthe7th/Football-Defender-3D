@@ -93,6 +93,23 @@ public class ManagerScript : MonoBehaviour
         TimeEngine.DefaultSpeed();
     }
 
+    public IEnumerator LevelPassedAnimations()
+    {
+        Debug.Log("Level Passed Animations started");
+        GameObject[] flowCubes = GameObject.FindGameObjectsWithTag("FlowCube");
+        foreach(GameObject flowCube in flowCubes)
+        {
+            flowCube.transform.localScale += Vector3.one * 0.1f;
+            float targetYPos = flowCube.transform.position.y - 25f;
+            Vector3 targetPos = new Vector3(flowCube.transform.position.x, targetYPos, flowCube.transform.position.z);
+            FlowToDirection cubeFlow = flowCube.GetComponent<FlowToDirection>();
+            cubeFlow.flowPoint = targetPos;
+            StartCoroutine(cubeFlow.Flow());
+            yield return new WaitForEndOfFrame();
+        }
+
+    }
+
     void LevelPassed()
     {
         Debug.Log("Level Passed");
