@@ -7,18 +7,45 @@ public class FlowToDirection : MonoBehaviour
 
     public Vector3 flowPoint = Vector3.zero;
     public GameObject explosionSystem;
+    public GameObject defender;
+    Light pointLight;
+    public bool isColorCloseToGreen;
 
     private void OnEnable()
     {
+        Color cubeColor = RandomColorSelector();
+        gameObject.GetComponent<Renderer>().material.color = cubeColor;
+        pointLight = gameObject.AddComponent<Light>();
+        pointLight.color = cubeColor;
+        pointLight.range = 10f;
+
+        if (isColorCloseToGreen)
+        {
+            pointLight.range = 3f;
+        }
+
+        pointLight.intensity = 0;
         transform.parent = null;
         explosionSystem = Resources.Load<GameObject>("Prefabs/ExplosionPS");
+        defender = GameObject.FindWithTag("Defender");
+    }
+
+    Color RandomColorSelector()
+    {
+        isColorCloseToGreen = false;
+        float randHue = Random.Range(0, 1.0f);
+        if(randHue<0.6f && randHue > 0.05f)
+        {
+            isColorCloseToGreen = true;
+        }
+        return Color.HSVToRGB(randHue, 1, 1);
     }
 
     
 
     public IEnumerator Flow()
     {
-        bool isExploded = false;
+       
         float waitTime = Random.Range(0.000f, 0.500f);
 
         yield return new WaitForSeconds(waitTime);
@@ -27,25 +54,7 @@ public class FlowToDirection : MonoBehaviour
         {
             transform.position = Vector3.Slerp(transform.position, flowPoint, 0.05f);
             // transform.Rotate(Vector3.right * 10f, 10f, Space.World);
-
-            if (DataScript.GetState() == DataScript.GameState.PassedLevel && !isExploded && (Mathf.Abs(gameObject.transform.position.x) <10f) ||
-                (Mathf.Abs(gameObject.transform.position.z) < 15f))//gameObject.transform.position.y <= -2f && !isExploded)
-            {
-                if(gameObject.transform.position.y <= -2f && !isExploded)
-                {
-                    isExploded = true;
-                    Instantiate(explosionSystem, transform.position, Quaternion.identity);
-                }
-            }
-            else
-            {
-                if (gameObject.transform.position.y <= 0 && !isExploded)
-                {
-                    isExploded = true;
-                    Instantiate(explosionSystem, transform.position, Quaternion.identity);
-                }
-            }
-
+            
             yield return new WaitForEndOfFrame();
         }
 
@@ -54,13 +63,37 @@ public class FlowToDirection : MonoBehaviour
         StopCoroutine(Flow());
     }
 
-  /*  private void Update()
+    public IEnumerator FlowToDefender(GameObject defender)
     {
-        if(flowPoint != Vector3.zero && Vector3.Distance(flowPoint,transform.position) > 0.5f)
+        pointLight.intensity = 2f;
+
+        //float waitTime = Random.Range(0.000f, 0.500f);
+
+        //yield return new WaitForSeconds(waitTime);
+        Vector3 defenderHeadPos = defender.transform.position;
+
+        while (Vector3.Distance(defenderHeadPos, transform.position) > 0.1f)
         {
-            transform.position = Vector3.Slerp(transform.position, flowPoint, 0.05f);
-            transform.Rotate(Vector3.right * 10f, 10f,Space.World);
+           
+            defenderHeadPos.y = defender.transform.position.y + 0.4f;
+            transform.position = Vector3.MoveTowards(transform.position, defenderHeadPos, 0.5f);
+            // transform.Rotate(Vector3.right * 10f, 10f, Space.World);
+
+            yield return new WaitForEndOfFrame();
         }
-    }*/
+
+
+        gameObject.SetActive(false);
+        StopCoroutine(FlowToDefender(defender));
+    }
+
+    /*  private void Update()
+      {
+          if(flowPoint != Vector3.zero && Vector3.Distance(flowPoint,transform.position) > 0.5f)
+          {
+              transform.position = Vector3.Slerp(transform.position, flowPoint, 0.05f);
+              transform.Rotate(Vector3.right * 10f, 10f,Space.World);
+          }
+      }*/
 
 }

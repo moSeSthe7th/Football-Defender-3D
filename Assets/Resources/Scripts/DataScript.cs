@@ -37,6 +37,7 @@ public static class DataScript
     public static int slidedDefenderCount;
     
     public static bool isLevelPassed;
+    public static bool isLevelAnimPlayed;
 
     public static int currentLevel;
     public static int maxLevel;

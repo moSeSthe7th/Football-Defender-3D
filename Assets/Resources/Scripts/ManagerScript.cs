@@ -12,6 +12,7 @@ public class ManagerScript : MonoBehaviour
     CameraScrıpt cam;
 
     GameObject startingBall;
+    GameObject startingParticleSys;
 
     bool fasted = false;
 
@@ -25,9 +26,11 @@ public class ManagerScript : MonoBehaviour
         DataScript.totalAttackerCount = 0;
         DataScript.tackledAttackerCount = 0;
         DataScript.isLevelPassed = false;
+        DataScript.isLevelAnimPlayed = false;
 
         DataScript.maxLevel = 3;
         DataScript.currentLevel = PlayerPrefs.GetInt("Current Level", 1);
+        
         
         primaryMap = Instantiate(Resources.Load<GameObject>("Levels/" + DataScript.currentLevel.ToString()), Vector3.zero, Quaternion.identity);
 
@@ -95,16 +98,32 @@ public class ManagerScript : MonoBehaviour
 
     public IEnumerator LevelPassedAnimations()
     {
+        GameObject defender = GameObject.FindWithTag("Defender");
+        /*GameObject hex = Resources.Load<GameObject>("Prefabs/altigen");
+        Vector3 hexPos = defender.transform.position;
+        hexPos.y = 0f;
+        Quaternion hexRotation = Quaternion.identity;
+        hexRotation.eulerAngles = new Vector3(90f, 0, 0);
+
+        Instantiate(hex, hexPos, hexRotation);
+
+        for(int i = 0; i < 10; i++)
+        {
+            hexPos.y += 0.1f;
+            hex.transform.position = hexPos;
+        }*/
+        yield return new WaitForSecondsRealtime(1f);
+        
         Debug.Log("Level Passed Animations started");
         GameObject[] flowCubes = GameObject.FindGameObjectsWithTag("FlowCube");
         foreach(GameObject flowCube in flowCubes)
         {
-            flowCube.transform.localScale += Vector3.one * 0.1f;
-            float targetYPos = flowCube.transform.position.y - 25f;
-            Vector3 targetPos = new Vector3(flowCube.transform.position.x, targetYPos, flowCube.transform.position.z);
+            flowCube.transform.localScale -= Vector3.one * 0.02f;
+
+            Vector3 targetPos = defender.transform.position;
             FlowToDirection cubeFlow = flowCube.GetComponent<FlowToDirection>();
             cubeFlow.flowPoint = targetPos;
-            StartCoroutine(cubeFlow.Flow());
+            StartCoroutine(cubeFlow.FlowToDefender(defender));
             yield return new WaitForEndOfFrame();
         }
 
@@ -160,9 +179,13 @@ public class ManagerScript : MonoBehaviour
         
 
         BallScript[] balls = primaryMap.GetComponentsInChildren<BallScript>();
-        StartingAnimation(balls);
+        startingParticleSys = Resources.Load<GameObject>("Prefabs/StartingParticleSys");
 
         yield return new WaitForSeconds(0.2f);
+        StartingAnimation(balls);
+        Instantiate(startingParticleSys, startingBall.transform.position, Quaternion.identity);
+        yield return new WaitForSeconds(0.2f);
+
         StartCoroutine(CountDown());
         //wait a little to see animation than rotate
         cam.RotateToGamePlayRotation();
