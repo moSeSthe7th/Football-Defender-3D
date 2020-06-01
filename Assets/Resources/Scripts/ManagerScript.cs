@@ -96,7 +96,7 @@ public class ManagerScript : MonoBehaviour
         TimeEngine.DefaultSpeed();
     }
 
-    public IEnumerator LevelPassedAnimations()
+    IEnumerator LevelPassedAnimations()
     {
         GameObject defender = GameObject.FindWithTag("Defender");
         /*GameObject hex = Resources.Load<GameObject>("Prefabs/altigen");
@@ -151,6 +151,8 @@ public class ManagerScript : MonoBehaviour
         }
 
         DataScript.ChangeState(DataScript.GameState.PassedLevel);
+
+        StartCoroutine(LevelPassedAnimations());
         uIManager.LevelPassed();
     }
 

@@ -13,12 +13,10 @@ public class CubeManDispose : MonoBehaviour
 
     Vector3 targetPosition;
     FlowToDirection cubeFlow;
-    ManagerScript managerScript;
     public Light pointLight;
 
     void OnEnable()
     {
-        managerScript = FindObjectOfType(typeof(ManagerScript)) as ManagerScript;
         bar = FindObjectOfType(typeof(PointBar)) as PointBar;
         defender = GameObject.FindWithTag("Defender");
 
@@ -54,11 +52,11 @@ public class CubeManDispose : MonoBehaviour
         }
         yield return new WaitForEndOfFrame();
 
-        if (DataScript.GetState() == DataScript.GameState.PassedLevel && !DataScript.isLevelAnimPlayed)
+      /*  if (DataScript.GetState() == DataScript.GameState.PassedLevel && !DataScript.isLevelAnimPlayed)
         {
             DataScript.isLevelAnimPlayed = true;
             StartCoroutine(managerScript.LevelPassedAnimations());
-        }
+        }*/
         StopCoroutine(dispose);
     }
 
