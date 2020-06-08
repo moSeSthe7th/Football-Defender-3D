@@ -9,6 +9,7 @@ TagManager:
   - Attacker
   - Football Field
   - Pitch
+  - FlowCube
   layers:
   - Default
   - TransparentFX
@@ -19,7 +20,7 @@ TagManager:
   - 
   - 
   - Atacker
-  - 
+  - Defender
   - 
   - 
   - 

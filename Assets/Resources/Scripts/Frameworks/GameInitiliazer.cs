@@ -8,6 +8,7 @@ public class GameInitiliazer : MonoBehaviour
 
     CameraSizeHandler camSizeHandler;
 
+    public float GameSpeed;
     public bool useCameraSizeHandler = false;
 
     void Awake()
@@ -22,11 +23,12 @@ public class GameInitiliazer : MonoBehaviour
 #if UNITY_EDITOR || (!UNITY_IPHONE || !UNITY_ANDROID)
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 30;
-        Time.timeScale = 1f;
 #elif UNITY_IPHONE || UNITY_ANDROID && !UNITY_EDITOR
         QualitySettings.vSyncCount = 1;
-        Time.timeScale = 1f;
 #endif
+        if (GameSpeed == 0)
+            GameSpeed = 1;
+        TimeEngine.gameSpeed = GameSpeed;
 
         if(useCameraSizeHandler)
         {

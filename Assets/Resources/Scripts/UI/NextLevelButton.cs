@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class NextLevelButton : MonoBehaviour
 {
-   public void GoNextLevel()
+    public void GoNextLevel()
     {
         if(DataScript.currentLevel < DataScript.maxLevel)
         {
