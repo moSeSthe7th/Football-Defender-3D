@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class CubeManDispose : MonoBehaviour
 {
@@ -13,7 +15,11 @@ public class CubeManDispose : MonoBehaviour
 
     Vector3 targetPosition;
     FlowToDirection cubeFlow;
-    public Light pointLight;
+
+    private void Start()
+    {
+        throw new NotImplementedException();
+    }
 
     void OnEnable()
     {

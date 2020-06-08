@@ -33,11 +33,11 @@ public class WatcherScript : MonoBehaviour
 
             if(randAnim == 1)
             {
-                anim.SetBool("Clapping", true);
+                anim.SetBool(DataScript.animHash.watcherHash.clap, true);
             }
             else if(randAnim == 2)
             {
-                 anim.SetBool("Standing", true);
+                 anim.SetBool(DataScript.animHash.watcherHash.stand, true);
             }
 
         }
@@ -89,17 +89,17 @@ public class WatcherScript : MonoBehaviour
         float reactionTime = Random.Range(0.000f, 0.250f);
         yield return new WaitForSeconds(reactionTime);
 
-        anim.SetTrigger("Lift");
+        anim.SetTrigger(DataScript.animHash.watcherHash.lift);
 
         float timePassed = 0f;
         while(!finishedLifting && timePassed < 2f)
         {
-            Vector3 boardPos = hand.transform.position + (hand.up * 0.1f);
+            Vector3 boardPos = hand.position + (hand.up * 0.1f);
             board.transform.position = boardPos;
 
             Quaternion boardRot = board.transform.localRotation;
             //boardRot.
-            board.transform.rotation = hand.transform.rotation;//Quaternion.RotateTowards(board.transform.rotation, Quaternion.Euler(Random.insideUnitSphere), 100f);
+            board.transform.rotation = hand.rotation;//Quaternion.RotateTowards(board.transform.rotation, Quaternion.Euler(Random.insideUnitSphere), 100f);
 
             yield return new WaitForEndOfFrame();
             timePassed += Time.deltaTime;

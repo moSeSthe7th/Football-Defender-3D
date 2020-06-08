@@ -18,6 +18,7 @@ public class ManagerScript : MonoBehaviour
 
     void Start()
     {
+        DataScript.animHash = new HashData();
         //Application.targetFrameRate = 30;
         //DataScript.inputLock = false;
         DataScript.goalCount = 0;

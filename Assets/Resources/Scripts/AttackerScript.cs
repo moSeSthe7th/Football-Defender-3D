@@ -7,7 +7,6 @@ public class AttackerScript : MonoBehaviour
     Animator attackerAnimator;
 
     public Transform cubeReplica;
-    Vector3 replicaPosition;
 
     GameObject ball;
     float ballY;
@@ -24,7 +23,6 @@ public class AttackerScript : MonoBehaviour
     public float attackerSpeed = 3f;
 
     Coroutine dribbleBall;
-    Coroutine disposeCube;
 
     SkinnedMeshRenderer attackerRenderer;
 
@@ -80,7 +78,7 @@ public class AttackerScript : MonoBehaviour
         //Wait until ball than start dribble
         yield return new WaitUntil(() => ball.transform.parent == this.transform);
 
-        attackerAnimator.SetBool("isGameStarted", true);
+        attackerAnimator.SetBool(DataScript.animHash.attackerHash.gameStarted, true);
         while (dribblePointNo < dribblePoints.Length && !isTackled/* && !DataScript.isGameOver*/)
         {
             DribbleWithBall();
@@ -91,9 +89,9 @@ public class AttackerScript : MonoBehaviour
         {
             //if attacker is stayed left on the net play attackerKickMirrored
             if(net.position.x - transform.position.x > 0f)
-                attackerAnimator.SetBool("isAttackerWon", true);
+                attackerAnimator.SetBool(DataScript.animHash.attackerHash.win, true);
             else
-                attackerAnimator.SetBool("isAttackerWonMirror", true);
+                attackerAnimator.SetBool(DataScript.animHash.attackerHash.winMirror, true);
 
             //wait for kick
             yield return new WaitForSeconds(0.7f); //kick animation ends after 0.7 sec approx. Could set animation event will be much more accurate
@@ -140,14 +138,7 @@ public class AttackerScript : MonoBehaviour
 
     IEnumerator DisposeCube()
     {
-        replicaPosition = cubeReplica.position;//set replica position and wait a frame 
         yield return new WaitForEndOfFrame();
-
-        for(int i = 0; i < 5; i++)
-        {
-            replicaPosition = cubeReplica.position;
-            yield return new WaitForEndOfFrame();
-        }
         //if position not changed continue
         /*while (didMoved(replicaPosition))
         {
@@ -158,7 +149,6 @@ public class AttackerScript : MonoBehaviour
         cubeReplica.gameObject.SetActive(true);
         attackerRenderer.enabled = false;
 
-        StopCoroutine(disposeCube);
     }
 
     bool didMoved(Vector3 oldPosition)
@@ -177,11 +167,9 @@ public class AttackerScript : MonoBehaviour
         {
             isTackled = true;
             ApplyTackleForce(tacklePos);
-
             StopCoroutine(dribbleBall);
-
-            disposeCube = StartCoroutine(DisposeCube());
-            //OpenRagdollPhysics();
+            cubeReplica.gameObject.SetActive(true);
+            attackerRenderer.enabled = false;
         }        
     }
     
@@ -189,9 +177,9 @@ public class AttackerScript : MonoBehaviour
     {
         Collider[] colliders = GetComponentsInChildren<Collider>();
 
-        foreach (Collider collider in colliders)
+        foreach (Collider coll in colliders)
         {
-            collider.isTrigger = false;
+            coll.isTrigger = false;
         }
 
     }
@@ -210,49 +198,4 @@ public class AttackerScript : MonoBehaviour
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
     }
-
-   
-
-    void OpenRagdollPhysics()
-    {
-        attackerAnimator.enabled = false;
-        transform.parent = null;
-
-        Collider[] colliders = GetComponentsInChildren<Collider>();
-        Rigidbody[] rigidbodies = GetComponentsInChildren<Rigidbody>();
-
-        foreach (Collider collider in colliders)
-        {
-            collider.isTrigger = false;
-        }
-
-        foreach (Rigidbody rigidbody in rigidbodies)
-        {
-            rigidbody.useGravity = true;
-        }
-        
-    }
-
-    void CloseRagdollPhysics()
-    {
-        Collider[] colliders = GetComponentsInChildren<Collider>();
-        Rigidbody[] rigidbodies = GetComponentsInChildren<Rigidbody>();
-
-        foreach (Collider collider in colliders)
-        {
-            if (collider.gameObject != this.gameObject)
-            {
-                collider.isTrigger = true;
-            }
-        }
-
-        foreach (Rigidbody rigidbody in rigidbodies)
-        {
-            if (rigidbody.gameObject != this.gameObject)
-            {
-                rigidbody.useGravity = false;
-            }
-        }
-    }
-
 }

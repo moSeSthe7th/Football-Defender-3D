@@ -12,6 +12,9 @@ public static class DataScript
         PassedLevel,
         GameOver
     }
+
+    public static HashData animHash;
+    
     //WARNING!!! --- do not change in ManagerScript since it will change it in every scene restart
     static GameState gameState = GameState.HomePage;
 

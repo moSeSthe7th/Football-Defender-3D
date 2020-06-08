@@ -70,7 +70,7 @@ public class DefenderScript : MonoBehaviour
 
     IEnumerator SlidingTackle()
     {
-        animator.SetBool("isTackling", true);
+        animator.SetBool(DataScript.animHash.defnderHash.tackle, true);
 
 #if JOYSTICK
 
@@ -128,8 +128,8 @@ public class DefenderScript : MonoBehaviour
 #endif
 
 
-        animator.SetBool("isTackling", false);
-        animator.SetBool("isTackleEnded", true);
+        animator.SetBool(DataScript.animHash.defnderHash.tackle, false);
+        animator.SetBool(DataScript.animHash.defnderHash.tackleEnd, true);
 
         DataScript.slidedDefenderCount++;
 
@@ -137,11 +137,11 @@ public class DefenderScript : MonoBehaviour
 
         if (!DataScript.isLevelPassed)
         {
-            animator.SetBool("isLost", true);
+            animator.SetBool(DataScript.animHash.defnderHash.lost, true);
         }
         else
         {
-            animator.SetBool("isWon", true);
+            animator.SetBool(DataScript.animHash.defnderHash.win, true);
         }
 
     }
@@ -149,7 +149,7 @@ public class DefenderScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Attacker")
+        if (other.gameObject.CompareTag("Attacker"))
         {
             other.GetComponent<AttackerScript>().Tackled(transform.position);
             DataScript.tackledAttackerCount++;
@@ -165,9 +165,9 @@ public class DefenderScript : MonoBehaviour
     {
         Collider[] colliders = GetComponentsInChildren<Collider>();
 
-        foreach (Collider collider in colliders)
+        foreach (Collider coll in colliders)
         {
-            collider.isTrigger = false;
+            coll.isTrigger = false;
         }
 
     }
@@ -179,14 +179,14 @@ public class DefenderScript : MonoBehaviour
         Collider[] colliders = GetComponentsInChildren<Collider>();
         Rigidbody[] rigidbodies = GetComponentsInChildren<Rigidbody>();
 
-        foreach (Collider collider in colliders)
+        foreach (Collider coll in colliders)
         {
-            collider.isTrigger = false;
+            coll.isTrigger = false;
         }
 
-        foreach (Rigidbody rigidbody in rigidbodies)
+        foreach (Rigidbody rb in rigidbodies)
         {
-            rigidbody.useGravity = true;
+            rb.useGravity = true;
             //rigidbody.isKinematic = false;
         }
         GetComponent<Animator>().enabled = false;
@@ -197,19 +197,19 @@ public class DefenderScript : MonoBehaviour
         Collider[] colliders = GetComponentsInChildren<Collider>();
         Rigidbody[] rigidbodies = GetComponentsInChildren<Rigidbody>();
 
-        foreach (Collider collider in colliders)
+        foreach (Collider coll in colliders)
         {
-            if (collider.gameObject != this.gameObject)
+            if (coll.gameObject != this.gameObject)
             {
-                collider.isTrigger = true;
+                coll.isTrigger = true;
             }
         }
 
-        foreach (Rigidbody rigidbody in rigidbodies)
+        foreach (Rigidbody rb in rigidbodies)
         {
-            if (rigidbody.gameObject != this.gameObject)
+            if (rb.gameObject != this.gameObject)
             {
-                rigidbody.useGravity = false;
+                rb.useGravity = false;
                 //rigidbody.isKinematic = true;
             }
         }
