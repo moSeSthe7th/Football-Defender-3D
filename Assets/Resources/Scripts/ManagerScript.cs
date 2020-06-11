@@ -15,6 +15,7 @@ public class ManagerScript : MonoBehaviour
     GameObject startingParticleSys;
 
     bool fasted = false;
+    public Light mainLight;
 
     void Start()
     {
@@ -120,7 +121,7 @@ public class ManagerScript : MonoBehaviour
         foreach(GameObject flowCube in flowCubes)
         {
             flowCube.transform.localScale -= Vector3.one * 0.02f;
-
+            mainLight.intensity -= 0.05f;
             Vector3 targetPos = defender.transform.position;
             FlowToDirection cubeFlow = flowCube.GetComponent<FlowToDirection>();
             cubeFlow.flowPoint = targetPos;
@@ -135,6 +136,8 @@ public class ManagerScript : MonoBehaviour
         Debug.Log("Level Passed");
 
         NormalizeSpeed();
+
+        
 
         Transform defender = primaryMap.GetComponentInChildren<DefenderScript>().transform;
         cam.SpanTo(defender);

@@ -18,7 +18,7 @@ public class CubeManDispose : MonoBehaviour
 
     private void Start()
     {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
     }
 
     void OnEnable()

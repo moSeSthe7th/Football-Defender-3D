@@ -14,14 +14,17 @@ public class FlowToDirection : MonoBehaviour
     private void OnEnable()
     {
         Color cubeColor = RandomColorSelector();
-        gameObject.GetComponent<Renderer>().material.color = cubeColor;
+        Material cubeMat = gameObject.GetComponent<Renderer>().material;
+        cubeMat.color = cubeColor;
+        cubeMat.SetColor("_EmissionColor", cubeColor * 5f);
+        cubeMat.EnableKeyword("_EMISSION");
         pointLight = gameObject.AddComponent<Light>();
         pointLight.color = cubeColor;
         pointLight.range = 10f;
 
         if (isColorCloseToGreen)
         {
-            pointLight.range = 3f;
+            pointLight.range = 1f;
         }
 
         pointLight.intensity = 0;
@@ -65,7 +68,7 @@ public class FlowToDirection : MonoBehaviour
 
     public IEnumerator FlowToDefender(GameObject defender)
     {
-        pointLight.intensity = 2f;
+        pointLight.intensity = 4f;
 
         //float waitTime = Random.Range(0.000f, 0.500f);
 
