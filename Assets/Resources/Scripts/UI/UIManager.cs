@@ -10,6 +10,7 @@ public class UIManager : MonoBehaviour
     public GameObject homePanel;
     public Image gameButton;
     public Image homebutton;
+    public Text scoreText;
 
     Sprite startSprite;
     Sprite nextSprite;
@@ -52,6 +53,7 @@ public class UIManager : MonoBehaviour
             gamePanel.SetActive(false);
             homePanel.SetActive(false);
         }
+
     }
 
     public void OnPressedPlay()
@@ -101,6 +103,11 @@ public class UIManager : MonoBehaviour
         homebutton.sprite = homeSprite;
         infoText.text = "GOAL!";
         gamePanel.SetActive(true);
+    }
+
+    public void SetScore()
+    {
+        scoreText.text = DataScript.score.ToString();
     }
 
     public void LevelPassed()

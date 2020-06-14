@@ -11,8 +11,11 @@ public class FlowToDirection : MonoBehaviour
     Light pointLight;
     public bool isColorCloseToGreen;
 
+    UIManager uIManager;
+
     private void OnEnable()
     {
+        
         Color cubeColor = RandomColorSelector();
         Material cubeMat = gameObject.GetComponent<Renderer>().material;
         cubeMat.color = cubeColor;
@@ -20,11 +23,11 @@ public class FlowToDirection : MonoBehaviour
         cubeMat.EnableKeyword("_EMISSION");
         pointLight = gameObject.AddComponent<Light>();
         pointLight.color = cubeColor;
-        pointLight.range = 10f;
+        pointLight.range = 1f;
 
         if (isColorCloseToGreen)
         {
-            pointLight.range = 1f;
+            pointLight.range = 0.3f;
         }
 
         pointLight.intensity = 0;
@@ -70,9 +73,9 @@ public class FlowToDirection : MonoBehaviour
     {
         pointLight.intensity = 4f;
 
-        //float waitTime = Random.Range(0.000f, 0.500f);
+        float waitTime = Random.Range(0.5f, 1f);
 
-        //yield return new WaitForSeconds(waitTime);
+        yield return new WaitForSeconds(waitTime);
         Vector3 defenderHeadPos = defender.transform.position;
 
         while (Vector3.Distance(defenderHeadPos, transform.position) > 0.1f)
@@ -87,6 +90,10 @@ public class FlowToDirection : MonoBehaviour
 
 
         gameObject.SetActive(false);
+        DataScript.score++;
+        PlayerPrefs.SetInt("Score", DataScript.score);
+        uIManager = FindObjectOfType(typeof(UIManager)) as UIManager;
+        uIManager.SetScore();
         StopCoroutine(FlowToDefender(defender));
     }
 

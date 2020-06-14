@@ -15,10 +15,10 @@ public class ManagerScript : MonoBehaviour
     GameObject startingParticleSys;
 
     bool fasted = false;
-    public Light mainLight;
-
+  
     void Start()
     {
+        DataScript.score = PlayerPrefs.GetInt("Score", 0);
         DataScript.animHash = new HashData();
         //Application.targetFrameRate = 30;
         //DataScript.inputLock = false;
@@ -29,15 +29,16 @@ public class ManagerScript : MonoBehaviour
         DataScript.tackledAttackerCount = 0;
         DataScript.isLevelPassed = false;
         DataScript.isLevelAnimPlayed = false;
+        
 
         DataScript.maxLevel = 3;
         DataScript.currentLevel = PlayerPrefs.GetInt("Current Level", 1);
-        
-        
+
         primaryMap = Instantiate(Resources.Load<GameObject>("Levels/" + DataScript.currentLevel.ToString()), Vector3.zero, Quaternion.identity);
 
         uIManager = FindObjectOfType(typeof(UIManager)) as UIManager;
         crowdController = FindObjectOfType(typeof(CrowdController)) as CrowdController;
+        uIManager.SetScore();
 
         startingBall = transform.GetChild(0).gameObject;
         cam = Camera.main.GetComponent<CameraScrıpt>();
@@ -118,16 +119,18 @@ public class ManagerScript : MonoBehaviour
         
         Debug.Log("Level Passed Animations started");
         GameObject[] flowCubes = GameObject.FindGameObjectsWithTag("FlowCube");
+       
         foreach(GameObject flowCube in flowCubes)
         {
             flowCube.transform.localScale -= Vector3.one * 0.02f;
-            mainLight.intensity -= 0.05f;
+            
             Vector3 targetPos = defender.transform.position;
             FlowToDirection cubeFlow = flowCube.GetComponent<FlowToDirection>();
             cubeFlow.flowPoint = targetPos;
             StartCoroutine(cubeFlow.FlowToDefender(defender));
-            yield return new WaitForEndOfFrame();
+            //yield return new WaitForEndOfFrame();
         }
+
 
     }
 

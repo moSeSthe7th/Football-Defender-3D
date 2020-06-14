@@ -44,4 +44,6 @@ public static class DataScript
 
     public static int currentLevel;
     public static int maxLevel;
+
+    public static int score;
 }
