@@ -6,11 +6,15 @@ using System;
 public class InputToJoyStick : InputController
 {
     public Transform targetTransform;
+    public Vector3 moveVector;
     public float sharpness = 15f;
+    public bool inputStarted; //return only true in the update input started
+    
     bool isStaniory { get; set; }
-    bool isInput { get; set; }
+    bool isInput { get; set; } 
     Vector2 touchStartPos;
-
+    private Vector2 inputDelta;
+    
     //float velocity;
     float maxVelocity;
 
@@ -32,7 +36,7 @@ public class InputToJoyStick : InputController
             touchPositions.Clear();
             touchStarted = true;
             AddTouchPoisition(touchPos);
-
+            inputStarted = true;
             touchStartPos = touchPos;
             isInput = true;
         }
@@ -48,17 +52,26 @@ public class InputToJoyStick : InputController
 
             touchStartPos += 0.25f * touchDelta;
             JoyStickMovement(touchDelta);
+            inputStarted = false;
         }
     }
 
-    protected override void OnTouchEnded(Vector2 touchPos)
+    protected override void OnTouchEndedDelta(Vector2 touchPos, Vector2 touchDelta)
     {
-        base.OnTouchEnded(touchPos);
+        base.OnTouchEndedDelta(touchPos,touchDelta);
+
+        inputDelta = touchDelta;
         touchStartPos = Vector2.zero;
         isInput = false;
+        inputStarted = false;
     }
 
-    public bool isSliding()
+    public Vector2 LastDelta()
+    {
+        return inputDelta;
+    }
+    
+    public bool isPresssing()
     {
         return isInput;
     }
@@ -79,13 +92,13 @@ public class InputToJoyStick : InputController
         }
 
         Vector2 delta = Vector2.ClampMagnitude(posDelta, maxVelocity);// max speed
-        Vector3 movementVec = new Vector3(delta.x, 0f, delta.y);
+        moveVector = new Vector3(delta.x, 0f, delta.y);
 
         // Debug.Log("Movement Vector is : " + movementVec + " Position is :" + transform.position);
         //targetTransform.position += movementVec;//  Vector3.Lerp(transform.position, movementVec, speedModifier * Time.deltaTime);
                                           // Debug.Log("New transform position is : " + transform.position); 
 
-        Quaternion targetRotation = Quaternion.LookRotation(movementVec);
+        Quaternion targetRotation = Quaternion.LookRotation(moveVector);
 
         targetTransform.rotation = Quaternion.RotateTowards(targetTransform.rotation, targetRotation, sharpness);
         //transform.rotation = Quaternion.RotateTowards(horizontalRotation, targetRotation, 30f);// * Quaternion.FromToRotation(localAxisToTarget, Vector3.forward) * Quaternion.FromToRotation(localAxisToUp, Vector3.up);

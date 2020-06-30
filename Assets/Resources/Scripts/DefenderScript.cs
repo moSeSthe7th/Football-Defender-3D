@@ -7,9 +7,21 @@ using UnityEngine;
 using UtmostInput;
 public class DefenderScript : MonoBehaviour
 {
+
+    enum State
+    {
+        Idle,
+        Running,
+        Slide,
+        Win,
+        Lost
+    }
+    
     Animator animator;
     Rigidbody defenderRb;
 
+    private State myState;
+    
 #if JOYSTICK
         InputToJoyStick inputController;
 #else
@@ -17,10 +29,14 @@ public class DefenderScript : MonoBehaviour
 #endif
     List<Vector3> defenderSlidePositions;
     [Range(1f,10f)]public float defenderSpeed;
-    bool slided;
+    
 
     VibrationHandler vibration;
 
+    private Coroutine defenderCorountine;
+
+    private float slideTime = 0f;
+    
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
@@ -29,8 +45,9 @@ public class DefenderScript : MonoBehaviour
 
         DataScript.totalDefenderCount++;
 
-        defenderSpeed = 10f;
-        slided = false;
+        defenderSpeed = 2f;
+
+        myState = State.Idle;
 
 #if JOYSTICK
         inputController = new InputToJoyStick(transform);
@@ -43,12 +60,32 @@ public class DefenderScript : MonoBehaviour
     void Update()
     {
 #if JOYSTICK
-        if (inputController.isSliding() && !slided)
+        if (inputController.inputStarted && DataScript.GetState() == DataScript.GameState.onGame)
         {
-            StartCoroutine(SlidingTackle());
-            slided = true;
+            if(defenderCorountine == null && myState == State.Idle)
+            {
+                myState = State.Running;
+
+                defenderCorountine = StartCoroutine( RunJoyStick());
+            }
+            else if(defenderCorountine != null && myState == State.Slide && slideTime > 0.5f)
+            {
+                StopCoroutine(defenderCorountine);
+                
+                defenderCorountine = null;
+                
+                //Debug.LogError(("start run"));
+
+                defenderCorountine = StartCoroutine( RunJoyStick());
+            }
         }
 
+        /*  else if(running && defenderCorountine == null)
+          {
+              Debug.LogError(("start run"));
+              defenderCorountine = StartCoroutine( RunJoyStick());
+          }
+  */
 #else
         if (inputController.routeComplete && !slided)
         {
@@ -68,6 +105,67 @@ public class DefenderScript : MonoBehaviour
     }
 
 
+    IEnumerator RunJoyStick()
+    {
+        ResetAnimator();
+        animator.SetBool(DataScript.animHash.defnderHash.run, true);
+        
+        float runSpeed = defenderSpeed;
+        bool inputEnded = false;
+
+        while(!inputEnded)
+        {
+            if(!inputController.isPresssing() || DataScript.GetState() != DataScript.GameState.onGame) // The game is over start slow down, than the tackeling will be end
+            {
+                inputEnded = true;
+            }
+
+            Quaternion targetRotation = Quaternion.LookRotation(inputController.moveVector);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 15f);
+
+            transform.position += transform.forward.normalized * 0.1f;
+            
+            yield return new WaitForEndOfFrame();
+        }
+        
+        Vector2 delta = inputController.LastDelta();
+        Vector3 slideRotation = new Vector3(delta.x, 0f, delta.y);
+        Quaternion targetRotSlide = Quaternion.LookRotation(transform.forward + slideRotation);
+
+        float maxDistance = 7f;
+        float maxVelocity = 3f;
+        
+        transform.rotation = targetRotSlide;
+        Vector3 targetPos = transform.position + (transform.forward * maxDistance);
+        
+        animator.SetBool(DataScript.animHash.defnderHash.run, false);
+        animator.SetBool(DataScript.animHash.defnderHash.tackle, true);
+        
+        yield return new WaitForEndOfFrame();
+
+        myState = State.Slide; //enter sliding mode
+        
+        while (myState == State.Slide)
+        {
+            transform.position = Vector3.Lerp(transform.position, targetPos, maxVelocity * Time.deltaTime);
+
+            if (Mathf.Abs(Vector3.Distance(transform.position, targetPos)) < 0.5f)
+                myState = State.Idle;
+
+            slideTime += Time.deltaTime;
+            
+            yield return new WaitForEndOfFrame();
+        }
+
+        slideTime = 0f;
+        
+        animator.SetBool(DataScript.animHash.defnderHash.tackle, false);
+        animator.SetBool(DataScript.animHash.defnderHash.tackleEnd, true);
+        
+        StopCoroutine(defenderCorountine);
+        defenderCorountine = null;
+    }
+
     IEnumerator SlidingTackle()
     {
         animator.SetBool(DataScript.animHash.defnderHash.tackle, true);
@@ -78,9 +176,9 @@ public class DefenderScript : MonoBehaviour
         bool slideEnded = false;
         bool onSlowDown = false;
 
-        while(!slideEnded )
+        while(!slideEnded)
         {
-            if(!inputController.isSliding() || DataScript.GetState() != DataScript.GameState.onGame) // The game is over start slow down, than the tackeling will be end
+            if(!inputController.isPresssing() || DataScript.GetState() != DataScript.GameState.onGame) // The game is over start slow down, than the tackeling will be end
             {
                 onSlowDown = true;
             }
@@ -147,71 +245,40 @@ public class DefenderScript : MonoBehaviour
     }
 
 
+    public void Win()
+    {
+        ResetAnimator();
+        animator.SetBool(DataScript.animHash.defnderHash.win, true);
+    }
+
+    public void Lose()
+    {
+        ResetAnimator();
+        animator.SetBool(DataScript.animHash.defnderHash.lost, true);
+    }
+
+    private void ResetAnimator()
+    {
+        animator.SetBool(DataScript.animHash.defnderHash.tackle, false);
+        animator.SetBool(DataScript.animHash.defnderHash.tackleEnd, false);
+        animator.SetBool(DataScript.animHash.defnderHash.run, false);
+        animator.SetBool(DataScript.animHash.defnderHash.lost, false);
+        animator.SetBool(DataScript.animHash.defnderHash.win, false);
+        animator.SetBool(DataScript.animHash.defnderHash.fall, false);
+    }
+    
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Attacker"))
+        if (other.gameObject.CompareTag("Attacker") && myState == State.Slide)
         {
             other.GetComponent<AttackerScript>().Tackled(transform.position);
             DataScript.tackledAttackerCount++;
 
             vibration.vibrate(2);
         }
-      
-    }
-
-    
-    
-    void OpenColliders()
-    {
-        Collider[] colliders = GetComponentsInChildren<Collider>();
-
-        foreach (Collider coll in colliders)
+        else if(other.gameObject.CompareTag("Attacker"))
         {
-            coll.isTrigger = false;
-        }
-
-    }
-
-    void OpenRagdollPhysics()
-    {
-        transform.parent = null;
-
-        Collider[] colliders = GetComponentsInChildren<Collider>();
-        Rigidbody[] rigidbodies = GetComponentsInChildren<Rigidbody>();
-
-        foreach (Collider coll in colliders)
-        {
-            coll.isTrigger = false;
-        }
-
-        foreach (Rigidbody rb in rigidbodies)
-        {
-            rb.useGravity = true;
-            //rigidbody.isKinematic = false;
-        }
-        GetComponent<Animator>().enabled = false;
-    }
-
-    void CloseRagdollPhysics()
-    {
-        Collider[] colliders = GetComponentsInChildren<Collider>();
-        Rigidbody[] rigidbodies = GetComponentsInChildren<Rigidbody>();
-
-        foreach (Collider coll in colliders)
-        {
-            if (coll.gameObject != this.gameObject)
-            {
-                coll.isTrigger = true;
-            }
-        }
-
-        foreach (Rigidbody rb in rigidbodies)
-        {
-            if (rb.gameObject != this.gameObject)
-            {
-                rb.useGravity = false;
-                //rigidbody.isKinematic = true;
-            }
+            animator.SetBool(DataScript.animHash.defnderHash.fall, true);
         }
     }
 }

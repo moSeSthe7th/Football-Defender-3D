@@ -14,6 +14,8 @@ public class ManagerScript : MonoBehaviour
     GameObject startingBall;
     GameObject startingParticleSys;
 
+    private DefenderScript player;
+
     bool fasted = false;
   
     void Start()
@@ -43,6 +45,8 @@ public class ManagerScript : MonoBehaviour
         startingBall = transform.GetChild(0).gameObject;
         cam = Camera.main.GetComponent<CameraScrıpt>();
         cam.followedObject = primaryMap.GetComponentInChildren<DefenderScript>().transform;
+        
+        player = GameObject.FindWithTag("Defender").GetComponent<DefenderScript>();
 
         StartCoroutine(GameStartCorountine());
     }
@@ -62,11 +66,11 @@ public class ManagerScript : MonoBehaviour
     //Lose if all defenders are slided and all attackers are not tackled
     void CheckState()
     {
-        if (DataScript.tackledAttackerCount >= DataScript.totalAttackerCount && DataScript.slidedDefenderCount >= DataScript.totalDefenderCount && !DataScript.isLevelPassed)
+        if (DataScript.tackledAttackerCount >= DataScript.totalAttackerCount /*&& DataScript.slidedDefenderCount >= DataScript.totalDefenderCount*/ && !DataScript.isLevelPassed)
         {
             LevelPassed();
         }
-        else if (DataScript.slidedDefenderCount >= DataScript.totalDefenderCount) //GAME OVER! all defenders slided but not all attackers tackled
+        else if (goalCount > 0)//(DataScript.slidedDefenderCount >= DataScript.totalDefenderCount) //GAME OVER! all defenders slided but not all attackers tackled
         {
             if (!fasted && DataScript.goalCount <= (DataScript.totalAttackerCount - DataScript.tackledAttackerCount))
             {
@@ -78,14 +82,14 @@ public class ManagerScript : MonoBehaviour
                 LevelFailed();
             }
         }
-        else if(DataScript.totalAttackerCount == DataScript.tackledAttackerCount)
+       /* else if(DataScript.totalAttackerCount == DataScript.tackledAttackerCount)
         {
             LevelPassed();
         }
-        else if (DataScript.goalCount != 0 && DataScript.goalCount == (DataScript.totalAttackerCount - DataScript.tackledAttackerCount))
+         else if (DataScript.goalCount != 0 && DataScript.goalCount == (DataScript.totalAttackerCount - DataScript.tackledAttackerCount))
         {
             LevelFailed();
-        }
+        }*/
     }
 
     void SpeedUpGame()
@@ -124,7 +128,7 @@ public class ManagerScript : MonoBehaviour
         {
             flowCube.transform.localScale -= Vector3.one * 0.02f;
             
-            Vector3 targetPos = defender.transform.position;
+            Vector3 targetPos = player.transform.position;
             FlowToDirection cubeFlow = flowCube.GetComponent<FlowToDirection>();
             cubeFlow.flowPoint = targetPos;
             StartCoroutine(cubeFlow.FlowToDefender(defender));
@@ -139,12 +143,11 @@ public class ManagerScript : MonoBehaviour
         Debug.Log("Level Passed");
 
         NormalizeSpeed();
-
         
-
-        Transform defender = primaryMap.GetComponentInChildren<DefenderScript>().transform;
-        cam.SpanTo(defender);
-
+        //DefenderScript defender = primaryMap.GetComponentInChildren<DefenderScript>();
+        cam.SpanTo(player.transform);
+        player.Win();
+        
         DataScript.isLevelPassed = true;
 
         if (DataScript.currentLevel < DataScript.maxLevel)
@@ -169,8 +172,9 @@ public class ManagerScript : MonoBehaviour
 
         NormalizeSpeed();
 
-        Transform attacker = primaryMap.GetComponentInChildren<AttackerScript>().transform;
-        cam.SpanTo(attacker);
+        //DefenderScript defender = primaryMap.GetComponentInChildren<DefenderScript>();
+        cam.SpanTo(player.transform);
+        player.Lose();
 
         DataScript.ChangeState(DataScript.GameState.GameOver);
         uIManager.GameOver();
@@ -192,17 +196,21 @@ public class ManagerScript : MonoBehaviour
 
         yield return new WaitForSeconds(0.2f);
         StartingAnimation(balls);
-        Instantiate(startingParticleSys, startingBall.transform.position, Quaternion.identity);
+        //Instantiate(startingParticleSys, startingBall.transform.position, Quaternion.identity);
         yield return new WaitForSeconds(0.2f);
 
         StartCoroutine(CountDown());
         //wait a little to see animation than rotate
         cam.RotateToGamePlayRotation();
           
+        cam.SpanTo(player.transform,7f,true);
+        
         yield return new WaitUntil(() => counted == true); // wait until count down to end
-
+        
         DataScript.ChangeState(DataScript.GameState.onGame);
 
+        
+        
         yield return null;
     }
 
@@ -221,7 +229,7 @@ public class ManagerScript : MonoBehaviour
         }
         counted = true;
         //yield return new WaitForSeconds(1f);
-;
+
         //SpriteToBoards GoSprites = new SpriteToBoards("LifterSprites/Go");
         //crowdController.StartLifting(GoSprites.spriteMaps);
 

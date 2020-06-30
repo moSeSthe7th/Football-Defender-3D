@@ -32,7 +32,7 @@ public class InputController : IDisposable
         //Set input events. This void will be called when input even occurs
         InputEventListener.inputEvent.onTouchStarted += ic.OnTouchStarted;
         InputEventListener.inputEvent.onTouch += ic.OnTouch;
-        InputEventListener.inputEvent.onTouchEnd += ic.OnTouchEnded;
+        InputEventListener.inputEvent.onTouchEndDelta += ic.OnTouchEndedDelta;
     }
 
     protected void RemoveEvents(InputController ic)
@@ -41,7 +41,7 @@ public class InputController : IDisposable
         //Set input events. This void will be called when input even occurs
         InputEventListener.inputEvent.onTouchStarted -= ic.OnTouchStarted;
         InputEventListener.inputEvent.onTouch -= ic.OnTouch;
-        InputEventListener.inputEvent.onTouchEnd -= ic.OnTouchEnded;
+        InputEventListener.inputEvent.onTouchEndDelta -= ic.OnTouchEndedDelta;
     }
 
     void gameStarted()
@@ -70,7 +70,7 @@ public class InputController : IDisposable
         }
     }
 
-    protected virtual void OnTouchEnded(Vector2 touchPos)
+    protected virtual void OnTouchEndedDelta(Vector2 touchPos,Vector2 touchDelta)
     {
         if (touchStarted)
         {

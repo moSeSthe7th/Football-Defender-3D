@@ -1,19 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class CameraScrıpt : MonoBehaviour
 {
     Camera thisCam;
     public Transform followedObject;
-    Vector3 offsetToFollowed;
 
     enum CameraState
     {
         OnHome,
         OnGame,
         OnCorountine,
-        Spanned
+        Spanned,
+        Follow
     }
 
     CameraState camState;
@@ -25,8 +26,8 @@ public class CameraScrıpt : MonoBehaviour
     Vector3 GamePlayPosition;
     Quaternion GamePlayRotation;
     float GamePlayFOV;
-
-    public Vector3 offsetToSpanned;
+    
+    public Vector3 offsetToFollowed;
     Vector3 spannedPosition;
 
     Coroutine camMovement = null;
@@ -45,7 +46,7 @@ public class CameraScrıpt : MonoBehaviour
         GamePlayRotation = Quaternion.Euler/*(55f, 0f, 0f);*/ (35f, 0f, 0f); //30 0 0 
         GamePlayFOV = 80f;
 
-        offsetToSpanned = new Vector3(0f, 1f, -3f);
+        offsetToFollowed = new Vector3(0f, 1f, -3f);
 
         if(turnSpeed == 0f)
         {
@@ -71,19 +72,10 @@ public class CameraScrıpt : MonoBehaviour
             //transform.position = targetPos;
            
         }
-        else if(camState == CameraState.Spanned)
+        else if (camState == CameraState.Follow)
         {
-            Quaternion mouseRotYAxis = Quaternion.AngleAxis(3f * turnSpeed * Time.deltaTime, Vector3.up);
-            mouseRotYAxis = Quaternion.Euler(0f, mouseRotYAxis.eulerAngles.y, 0f);
-
-            offsetToSpanned =/* mouseRotXAxis */ mouseRotYAxis * offsetToSpanned;
-           // transform.position = spannedPosition + offsetToSpanned;
-
-            Quaternion targetRotation = Quaternion.LookRotation(spannedPosition - transform.position);
-          //  transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 0.5f);
-
-            spannedTime += Time.deltaTime;
-
+            Follow(offsetToFollowed);
+            //transform.LookAt(followedObject, Vector3.up);
         }
     }
 
@@ -100,17 +92,44 @@ public class CameraScrıpt : MonoBehaviour
 
     }
 
-    public void SpanTo(Transform character)
+    public void SpanTo(Transform character, bool doNotCut = false)
     {
         if (camMovement == null)
-            camMovement = StartCoroutine(SpanToPosition(character));
+            camMovement = StartCoroutine(SpanToPosition(character,turnSpeed));
         else
         {
-            Debug.LogWarning("camMovement is on use stopping other corountine");
-            StopCoroutine(camMovement);
-            camMovement = StartCoroutine(SpanToPosition(character));
+            if (doNotCut)
+            {
+                StartCoroutine(WaitUntillNull(camMovement, character,turnSpeed));
+            }
+            else
+            {
+                Debug.LogWarning("camMovement is on use stopping other corountine");
+                StopCoroutine(camMovement);
+                camMovement = StartCoroutine(SpanToPosition(character,turnSpeed));
+            }
         }
     }
+    
+    public void SpanTo(Transform character,float speed, bool doNotCut = false)
+    {
+        if (camMovement == null)
+            camMovement = StartCoroutine(SpanToPosition(character,speed));
+        else
+        {
+            if (doNotCut)
+            {
+                StartCoroutine(WaitUntillNull(camMovement, character, speed));
+            }
+            else
+            {
+                Debug.LogWarning("camMovement is on use stopping other corountine");
+                StopCoroutine(camMovement);
+                camMovement = StartCoroutine(SpanToPosition(character,speed));
+            }
+        }
+    }
+
 
     IEnumerator RotateOnStart()
     {
@@ -163,25 +182,30 @@ public class CameraScrıpt : MonoBehaviour
         yield return null;
     }
      
-    IEnumerator SpanToPosition(Transform spannedObj)
+    IEnumerator SpanToPosition(Transform spannedObj,float speed, float downModifier = 0f)
     {
         camState = CameraState.OnCorountine;
 
-        yield return new WaitForSeconds(1f);
-
-        float downModifier = 1f;
+        //yield return new WaitForSeconds(1f);
 
         bool spanned = false;
+
+        Vector3 spanPos = spannedObj.position;
+        
+        Vector3 offset = new Vector3(0f, 2f, -3f);
+        
         while(!spanned)
         {
-            float distanceToSpan = Vector3.Distance(transform.position, spannedObj.position + (Vector3.down * downModifier) + offsetToSpanned);
+            
+            float distanceToSpan = Vector3.Distance(transform.position, spanPos + (Vector3.down * downModifier) + offset);
+            
             if (distanceToSpan > 1f)
             {
-                transform.position = Vector3.Lerp(transform.position, spannedObj.position + (Vector3.down * downModifier) + offsetToSpanned, turnSpeed / 150f);
+                transform.position = Vector3.Lerp(transform.position, spanPos + (Vector3.down * downModifier) + offset, speed / 150f);
 
                 //if(distanceToSpan < 5f)
                 {
-                    var targetRotation = Quaternion.LookRotation(spannedObj.position - transform.position);
+                    var targetRotation = Quaternion.LookRotation(spanPos - transform.position);
                     transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, 1f / distanceToSpan);
                 }
 
@@ -194,13 +218,78 @@ public class CameraScrıpt : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
 
-        offsetToSpanned = transform.position - spannedObj.position;
-        spannedPosition = spannedObj.position;
-        camState = CameraState.Spanned;
+        offsetToFollowed = transform.position - spanPos;
+        spannedPosition = spanPos;
+        camState = CameraState.Follow;
         StopCoroutine(camMovement);
         camMovement = null;
 
         yield return null;
+    }
+
+    IEnumerator WaitUntillNull(Coroutine coroutine, Transform character,float speed)
+    {
+        while (camMovement != null)
+        {
+            yield return new WaitForEndOfFrame();
+        }
+
+        SpanTo(character,speed);
+    }
+
+    private Quaternion targetRotation;
+    private bool rotated = false;
+    private float totalAngles = 0f;
+    
+    Quaternion LookAtTarget(Quaternion rot)
+    {
+        Quaternion targetRot = Quaternion.identity;
+
+        bool rotatedBackward = followedObject.transform.forward.z < -0.4f && rotated == false;
+        bool rotateForward = followedObject.transform.forward.z > 0.2f && rotated == true;
+        
+        
+        //Debug.Log(followedObject.transform.forward);
+        if (rotatedBackward || rotateForward)
+        {
+            
+            Debug.Log((totalAngles));
+            
+            if (/*Mathf.Approximately(transform.forward.z, 1f)*/ totalAngles >= 180f)
+            {
+                rotated = true;
+                //targetRot = Quaternion.Euler(0f,180f,0f);
+                totalAngles = 0f;
+                return targetRot;
+            }
+            
+            targetRot = Quaternion.AngleAxis(turnSpeed, Vector3.up);
+            totalAngles += turnSpeed;
+            //targetForward = transform.eulerAngles + 180f * Vector3.up;
+
+            /*  offsetToSpanned = Quaternion.AngleAxis (turnSpeed, Vector3.up) * offsetToSpanned;
+              transform.position = followedObject.position + offsetToSpanned; 
+              transform.LookAt(followedObject.position);
+              
+              if(Mathf.Approximately(transform.rotation.y, 180f))
+                  transform.rotation = Quaternion.Euler(transform.rotation.x,180f,transform.rotation.z);*/
+        }
+        
+        /*Vector3 relativePos = followedObject.position - transform.position;
+        Vector3 y = new Vector3 (0, 1f, 0);
+        Quaternion newRotation = Quaternion.LookRotation (relativePos + y);
+        transform.rotation = Quaternion.Slerp (transform.rotation, newRotation, 10f * Time.deltaTime);*/
+
+        return targetRot;
+    }
+    
+    public void Follow(Vector3 offset)
+    {
+        targetRotation = LookAtTarget(targetRotation);
+        
+        offsetToFollowed = targetRotation * offsetToFollowed;
+        transform.position = followedObject.position + offsetToFollowed; 
+        transform.LookAt(followedObject.position);
     }
 
 }

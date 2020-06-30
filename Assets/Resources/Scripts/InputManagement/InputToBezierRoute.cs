@@ -33,7 +33,7 @@ public class InputToBezierRoute : InputController
 
     }
 
-    protected override void OnTouchEnded(Vector2 touchPos)
+    protected override void OnTouchEndedDelta(Vector2 touchPos, Vector2 touchDelta)
     {
 
         if(touchStarted)

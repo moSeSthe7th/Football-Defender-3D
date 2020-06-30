@@ -42,7 +42,7 @@ TagManager:
   - 
   - 
   - 
-  - 
+  - EditorOnly
   m_SortingLayers:
   - name: Canvas
     uniqueID: 1283019941

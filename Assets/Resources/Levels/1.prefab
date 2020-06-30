@@ -1,215 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &942530341234934304
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 942530341234934305}
-  m_Layer: 0
-  m_Name: DribblePoint (6)
-  m_TagString: Untagged
-  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &942530341234934305
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 942530341234934304}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.4960136, y: -0.37942493, z: -6.1910567}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 383038232108573936}
-  m_RootOrder: 6
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &942530341816764686
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 942530341816764687}
-  m_Layer: 0
-  m_Name: DribblePoint (4)
-  m_TagString: Untagged
-  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &942530341816764687
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 942530341816764686}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.4590136, y: -0.37942493, z: -5.265057}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 383038232108573936}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &942530341915694279
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 942530341915694280}
-  m_Layer: 0
-  m_Name: DribblePoint (8)
-  m_TagString: Untagged
-  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &942530341915694280
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 942530341915694279}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.4090136, y: -0.37942493, z: -8.0950575}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 383038232108573936}
-  m_RootOrder: 8
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &942530342324695795
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 942530342324695796}
-  m_Layer: 0
-  m_Name: DribblePoint (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &942530342324695796
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 942530342324695795}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.0460134, y: -0.37942493, z: -1.8970568}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 383038232108573936}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &942530342550795186
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 942530342550795187}
-  m_Layer: 0
-  m_Name: DribblePoint (3)
-  m_TagString: Untagged
-  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &942530342550795187
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 942530342550795186}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.1840136, y: -0.37942493, z: -4.0530567}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 383038232108573936}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &942530342607726502
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 942530342607726503}
-  m_Layer: 0
-  m_Name: DribblePoint (7)
-  m_TagString: Untagged
-  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &942530342607726503
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 942530342607726502}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.4960136, y: -0.37942493, z: -7.075057}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 383038232108573936}
-  m_RootOrder: 7
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &942530342642780228
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 942530342642780229}
-  m_Layer: 0
-  m_Name: DribblePoint (5)
-  m_TagString: Untagged
-  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &942530342642780229
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 942530342642780228}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.4960136, y: -0.37942493, z: -5.265057}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 383038232108573936}
-  m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &942530342725033538
 GameObject:
   m_ObjectHideFlags: 0
@@ -242,66 +32,6 @@ Transform:
   - {fileID: 8702574458693425734}
   - {fileID: 8119462314811094772}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &942530343152206614
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 942530343152206615}
-  m_Layer: 0
-  m_Name: DribblePoint (2)
-  m_TagString: Untagged
-  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &942530343152206615
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 942530343152206614}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.8230135, y: -0.37942493, z: -3.2980568}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 383038232108573936}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &942530343228835333
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 942530343228835334}
-  m_Layer: 0
-  m_Name: DribblePoint
-  m_TagString: Untagged
-  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &942530343228835334
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 942530343228835333}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.4300137, y: -0.37942493, z: -0.5300569}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 383038232108573936}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &2340868501290169800
@@ -1018,47 +748,47 @@ PrefabInstance:
         type: 3}
       propertyPath: dribblePoints.Array.data[0]
       value: 
-      objectReference: {fileID: 942530343228835334}
+      objectReference: {fileID: 0}
     - target: {fileID: 6128055712596388063, guid: 3509198180f2b904bbf25dd7d5712c6c,
         type: 3}
       propertyPath: dribblePoints.Array.data[1]
       value: 
-      objectReference: {fileID: 942530342324695796}
+      objectReference: {fileID: 0}
     - target: {fileID: 6128055712596388063, guid: 3509198180f2b904bbf25dd7d5712c6c,
         type: 3}
       propertyPath: dribblePoints.Array.data[2]
       value: 
-      objectReference: {fileID: 942530343152206615}
+      objectReference: {fileID: 0}
     - target: {fileID: 6128055712596388063, guid: 3509198180f2b904bbf25dd7d5712c6c,
         type: 3}
       propertyPath: dribblePoints.Array.data[3]
       value: 
-      objectReference: {fileID: 942530342550795187}
+      objectReference: {fileID: 0}
     - target: {fileID: 6128055712596388063, guid: 3509198180f2b904bbf25dd7d5712c6c,
         type: 3}
       propertyPath: dribblePoints.Array.data[4]
       value: 
-      objectReference: {fileID: 942530341816764687}
+      objectReference: {fileID: 0}
     - target: {fileID: 6128055712596388063, guid: 3509198180f2b904bbf25dd7d5712c6c,
         type: 3}
       propertyPath: dribblePoints.Array.data[5]
       value: 
-      objectReference: {fileID: 942530342642780229}
+      objectReference: {fileID: 0}
     - target: {fileID: 6128055712596388063, guid: 3509198180f2b904bbf25dd7d5712c6c,
         type: 3}
       propertyPath: dribblePoints.Array.data[6]
       value: 
-      objectReference: {fileID: 942530341234934305}
+      objectReference: {fileID: 0}
     - target: {fileID: 6128055712596388063, guid: 3509198180f2b904bbf25dd7d5712c6c,
         type: 3}
       propertyPath: dribblePoints.Array.data[7]
       value: 
-      objectReference: {fileID: 942530342607726503}
+      objectReference: {fileID: 0}
     - target: {fileID: 6128055712596388063, guid: 3509198180f2b904bbf25dd7d5712c6c,
         type: 3}
       propertyPath: dribblePoints.Array.data[8]
       value: 
-      objectReference: {fileID: 942530341915694280}
+      objectReference: {fileID: 0}
     - target: {fileID: 6128055712596388063, guid: 3509198180f2b904bbf25dd7d5712c6c,
         type: 3}
       propertyPath: shootPos.x
@@ -1081,21 +811,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3509198180f2b904bbf25dd7d5712c6c, type: 3}
---- !u!4 &2584565825369417267 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1372663127783177618, guid: 3509198180f2b904bbf25dd7d5712c6c,
-    type: 3}
-  m_PrefabInstance: {fileID: 3518038340102839201}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &6039981009397435941 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7133921167478723972, guid: 3509198180f2b904bbf25dd7d5712c6c,
     type: 3}
   m_PrefabInstance: {fileID: 3518038340102839201}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &383038232108573936 stripped
+--- !u!4 &2584565825369417267 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 3855721218274590545, guid: 3509198180f2b904bbf25dd7d5712c6c,
+  m_CorrespondingSourceObject: {fileID: 1372663127783177618, guid: 3509198180f2b904bbf25dd7d5712c6c,
     type: 3}
   m_PrefabInstance: {fileID: 3518038340102839201}
   m_PrefabAsset: {fileID: 0}
@@ -1691,15 +1415,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6815a9f033752fa4e913136c33ce0a63, type: 3}
---- !u!1 &7600542224632179582 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1835943447089762856, guid: 6815a9f033752fa4e913136c33ce0a63,
-    type: 3}
-  m_PrefabInstance: {fileID: 8070477144820758870}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8702574458693425734 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 632150365851886352, guid: 6815a9f033752fa4e913136c33ce0a63,
+    type: 3}
+  m_PrefabInstance: {fileID: 8070477144820758870}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &7600542224632179582 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1835943447089762856, guid: 6815a9f033752fa4e913136c33ce0a63,
     type: 3}
   m_PrefabInstance: {fileID: 8070477144820758870}
   m_PrefabAsset: {fileID: 0}

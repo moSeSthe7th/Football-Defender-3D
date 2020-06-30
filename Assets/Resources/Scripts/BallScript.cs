@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class BallScript : MonoBehaviour
 {
-    Rigidbody rb;
+    public Rigidbody rb;
     Transform myAttacker;
     Vector3 initialPosition;
 
@@ -44,8 +44,10 @@ public class BallScript : MonoBehaviour
         }
 
         transform.position = initialPosition;
-        transform.parent = myAttacker;
+        //transform.parent = myAttacker;
 
+        rb.velocity = Vector3.zero;
+        
         placed = true;
 
         yield return null;

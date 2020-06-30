@@ -40,7 +40,7 @@ public class InputEventListener : MonoBehaviour
             }
             else
             {
-                TouchEnd(touch.currentPosition);
+                 TouchEnd(touch.currentPosition,touch.delta);
             }
         }
     }
@@ -63,14 +63,21 @@ public class InputEventListener : MonoBehaviour
         }
     }
 
+    public event Action<Vector2, Vector2> onTouchEndDelta;
     public event Action<Vector2> onTouchEnd;
-    public void TouchEnd(Vector2 touchPos)
+    public void TouchEnd(Vector2 touchPos, Vector2 touchDelta)
     {
         if (onTouchEnd != null) //if any other object is using this event
         {
             onTouchEnd(touchPos);
         }
+
+        if (onTouchEndDelta != null)
+        {
+            onTouchEndDelta(touchPos, touchDelta);
+        }
     }
 
+    
 
 }

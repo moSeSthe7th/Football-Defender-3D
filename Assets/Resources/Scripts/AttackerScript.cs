@@ -8,35 +8,36 @@ public class AttackerScript : MonoBehaviour
 
     public Transform cubeReplica;
 
-    GameObject ball;
-    float ballY;
+    BallScript myBall;
 
     Rigidbody[] rigidbodies;
-    Transform[] dribblePoints;
-    int dribblePointNo;
-    Vector3 dribbleTo;
+    //Transform[] dribblePoints;
+    //int dribblePointNo;
+    //Vector3 dribbleTo;
 
     bool isTackled;
+    private bool isShooted;
 
     Transform net;
-
-    public float attackerSpeed = 3f;
+    private Transform shootPos;
+    
+    public float attackerSpeed;
 
     Coroutine dribbleBall;
-
     SkinnedMeshRenderer attackerRenderer;
 
     void OnEnable()
     {
-
+        attackerSpeed = 1.5f;
+        
         attackerAnimator = GetComponent<Animator>();
         DataScript.totalAttackerCount++;
-        ball = transform.GetChild(0).gameObject;
-        dribblePointNo = 0;
+        myBall = transform.GetChild(0).gameObject.GetComponent<BallScript>();
+       // dribblePointNo = 0;
         
-        ballY = ball.transform.position.y;
         isTackled = false;
-        dribblePoints = transform.GetChild(1).GetComponent<DribblePoints>().GetDribblePoints();
+        isShooted = false;
+        //dribblePoints = transform.GetChild(1).GetComponent<DribblePoints>().GetDribblePoints();
 
         rigidbodies = GetComponentsInChildren<Rigidbody>();
         attackerRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
@@ -44,11 +45,14 @@ public class AttackerScript : MonoBehaviour
         if (!net)
             net = GameObject.Find("Net_01").transform;
 
+        if (!shootPos)
+            shootPos = GameObject.Find("ShootLine").transform;
+
         if (cubeReplica == null)
-            foreach(Transform cubeRep in GetComponentsInChildren<Transform>())
+            foreach(Transform childTransform in GetComponentsInChildren<Transform>())
             {
-                if (cubeRep.name.ToLower().Contains("cubeman"))
-                    cubeReplica = cubeRep;
+                if (childTransform.name.ToLower().Contains("cubeman"))
+                    cubeReplica = childTransform;
             }
         cubeReplica.gameObject.SetActive(false);
 
@@ -76,16 +80,16 @@ public class AttackerScript : MonoBehaviour
     IEnumerator DribbleTheBall()
     {
         //Wait until ball than start dribble
-        yield return new WaitUntil(() => ball.transform.parent == this.transform);
-
+        yield return new WaitUntil(() => myBall.placed == true);
+        
         attackerAnimator.SetBool(DataScript.animHash.attackerHash.gameStarted, true);
-        while (dribblePointNo < dribblePoints.Length && !isTackled/* && !DataScript.isGameOver*/)
+        while (!isShooted && !isTackled)
         {
             DribbleWithBall();
-            yield return new WaitForEndOfFrame();
+            yield return new WaitForFixedUpdate();
         }
 
-        if (!isTackled)
+        if (!isTackled && isShooted)
         {
             //if attacker is stayed left on the net play attackerKickMirrored
             if(net.position.x - transform.position.x > 0f)
@@ -95,72 +99,56 @@ public class AttackerScript : MonoBehaviour
 
             //wait for kick
             yield return new WaitForSeconds(0.7f); //kick animation ends after 0.7 sec approx. Could set animation event will be much more accurate
-
-            ball.transform.parent = null;
-             
+            
             SendBallToGoal();
+            
             DataScript.goalCount++;
         }
 
         StopCoroutine(dribbleBall);
-           
     }
 
     void SendBallToGoal()
     {
-        ball.GetComponent<Rigidbody>().AddForce((net.position - ball.transform.position) * 3f, ForceMode.VelocityChange);
-        ball.GetComponent<Rigidbody>().AddTorque((net.position - ball.transform.position) * 3f, ForceMode.VelocityChange);
+        Vector3 force = (net.position - myBall.transform.position) * attackerSpeed * 2f;
+        myBall.rb.AddForce(force, ForceMode.VelocityChange);
+        myBall.rb.AddTorque(force, ForceMode.VelocityChange);
     }
 
+    void KickBall()
+    {
+        Vector3 kickPos = transform.position;
+        kickPos.z -= 1;
+        kickPos.x += Random.Range(-0.5f, 0.5f);
+        
+
+        myBall.rb.AddForce((kickPos - transform.position) * 3f,ForceMode.VelocityChange);
+        myBall.rb.AddTorque((kickPos - transform.position) * 3f, ForceMode.VelocityChange);
+    }
+    
     void DribbleWithBall()
     {
-        dribbleTo = dribblePoints[dribblePointNo].position;
-        dribbleTo.y = ballY;
 
-        ball.transform.Rotate(new Vector3(-40f, 0, 0));
-        ball.transform.position = Vector3.MoveTowards(transform.position, dribbleTo, attackerSpeed * 2f * Time.deltaTime);
-
-        Quaternion targetRotation = Quaternion.LookRotation(ball.transform.position - transform.position);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 5f * Time.deltaTime);
-        transform.position = Vector3.MoveTowards(transform.position, ball.transform.position, attackerSpeed * Time.deltaTime);
-
-        isReachedDribblePoint();
-    }
-
-    void isReachedDribblePoint()
-    {
-        if (Vector3.SqrMagnitude(ball.transform.position - dribbleTo) < 0.3f)
+        if (Mathf.Abs(Vector3.Distance(transform.position, myBall.transform.position)) < 0.1f) //Mathf.Approximately(Vector3.Distance(transform.position, myBall.transform.position), 0f))
         {
-            dribblePointNo++;
-        }
-        
-    }
-
-    IEnumerator DisposeCube()
-    {
-        yield return new WaitForEndOfFrame();
-        //if position not changed continue
-        /*while (didMoved(replicaPosition))
-        {
-            replicaPosition = cubeReplica.position;
-            yield return new WaitForEndOfFrame();
-        }*/
-
-        cubeReplica.gameObject.SetActive(true);
-        attackerRenderer.enabled = false;
-
-    }
-
-    bool didMoved(Vector3 oldPosition)
-    {
-        if (Vector3.Distance(oldPosition, cubeReplica.position) < 0.01f)
-        {
-            return false;
+            if (myBall.transform.position.z < shootPos.position.z)
+            {
+                //shoot goal
+                isShooted = true;
+                return;
+            }
+            else
+            {
+                //kick ball
+                KickBall();
+            }
         }
 
-        return true;
+        Quaternion targetRotation = Quaternion.LookRotation(myBall.transform.position - transform.position);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, attackerSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, myBall.transform.position, attackerSpeed * Time.deltaTime);
     }
-
+    
     public void Tackled(Vector3 tacklePos)
     {
         if(isTackled == false)

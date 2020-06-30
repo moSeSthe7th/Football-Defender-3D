@@ -12,9 +12,11 @@ public class HashData
     }
    
 	public struct Defender
-    { 
+	{
+		public int run;
 	    public int tackle;// animator.SetBool("isTackling", true);
 	    public int tackleEnd;// animator.SetBool("isTackleEnded", true);
+	    public int fall;
 	    public int lost;// animator.SetBool("isLost", true);
 	    public int win;//animator.SetBool("isWon", true);
     }
@@ -38,8 +40,10 @@ public class HashData
 		attackerHash.winMirror = Animator.StringToHash("isAttackerWonMirror");
 		
 		defnderHash = new Defender();
+		defnderHash.run = Animator.StringToHash("isRunning");
 		defnderHash.tackle = Animator.StringToHash("isTackling");
 		defnderHash.tackleEnd = Animator.StringToHash("isTackleEnded");
+		defnderHash.fall = Animator.StringToHash("Fall");
 		defnderHash.lost = Animator.StringToHash("isLost");
 		defnderHash.win = Animator.StringToHash("isWon");
 		
