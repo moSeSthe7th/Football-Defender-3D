@@ -82,14 +82,6 @@ public class ManagerScript : MonoBehaviour
                 LevelFailed();
             }
         }
-       /* else if(DataScript.totalAttackerCount == DataScript.tackledAttackerCount)
-        {
-            LevelPassed();
-        }
-         else if (DataScript.goalCount != 0 && DataScript.goalCount == (DataScript.totalAttackerCount - DataScript.tackledAttackerCount))
-        {
-            LevelFailed();
-        }*/
     }
 
     void SpeedUpGame()
@@ -105,7 +97,7 @@ public class ManagerScript : MonoBehaviour
 
     IEnumerator LevelPassedAnimations()
     {
-        GameObject defender = GameObject.FindWithTag("Defender");
+       // GameObject defender = GameObject.FindWithTag("Defender");
         /*GameObject hex = Resources.Load<GameObject>("Prefabs/altigen");
         Vector3 hexPos = defender.transform.position;
         hexPos.y = 0f;
@@ -131,7 +123,7 @@ public class ManagerScript : MonoBehaviour
             Vector3 targetPos = player.transform.position;
             FlowToDirection cubeFlow = flowCube.GetComponent<FlowToDirection>();
             cubeFlow.flowPoint = targetPos;
-            StartCoroutine(cubeFlow.FlowToDefender(defender));
+            StartCoroutine(cubeFlow.FlowToDefender(player.gameObject));
             //yield return new WaitForEndOfFrame();
         }
 
@@ -145,7 +137,7 @@ public class ManagerScript : MonoBehaviour
         NormalizeSpeed();
         
         //DefenderScript defender = primaryMap.GetComponentInChildren<DefenderScript>();
-        cam.SpanTo(player.transform);
+        //cam.SpanTo(player.transform);
         player.Win();
         
         DataScript.isLevelPassed = true;
@@ -173,7 +165,7 @@ public class ManagerScript : MonoBehaviour
         NormalizeSpeed();
 
         //DefenderScript defender = primaryMap.GetComponentInChildren<DefenderScript>();
-        cam.SpanTo(player.transform);
+        //cam.SpanTo(player.transform);
         player.Lose();
 
         DataScript.ChangeState(DataScript.GameState.GameOver);
@@ -203,7 +195,7 @@ public class ManagerScript : MonoBehaviour
         //wait a little to see animation than rotate
         cam.RotateToGamePlayRotation();
           
-        cam.SpanTo(player.transform,7f,true);
+        cam.SpanTo(player.transform,10f,true);
         
         yield return new WaitUntil(() => counted == true); // wait until count down to end
         

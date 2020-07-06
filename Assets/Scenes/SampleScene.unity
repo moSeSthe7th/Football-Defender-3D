@@ -5523,7 +5523,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   followedObject: {fileID: 0}
   offsetToFollowed: {x: 0, y: 0, z: 0}
-  turnSpeed: 5
+  turnSpeed: 7
 --- !u!1 &1048358649
 GameObject:
   m_ObjectHideFlags: 0
@@ -6444,7 +6444,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 1191427c65261c249bd2e454e1897466, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 555e86deb6f88cf459fc9b7837d99150, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -6780,7 +6780,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 194c3c025033fb8449171df9a7be8d13, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6299d48dfd65b634c9732294d91592aa, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1

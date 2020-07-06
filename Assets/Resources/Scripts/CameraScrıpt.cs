@@ -142,7 +142,7 @@ public class CameraScrıpt : MonoBehaviour
         {
             if (Vector3.Distance(transform.position, GamePlayPosition) > 2f) //!Mathf.Approximately(transform.position.sqrMagnitude, GamePlayPosition.sqrMagnitude))
             {
-                transform.position = Vector3.Lerp(transform.position, GamePlayPosition, turnSpeed / 100f);
+                transform.position = Vector3.Lerp(transform.position, GamePlayPosition, turnSpeed / 200f);
             }
             else
             {
@@ -152,7 +152,7 @@ public class CameraScrıpt : MonoBehaviour
 
             if (Vector3.Distance(transform.rotation.eulerAngles, GamePlayRotation.eulerAngles) > 5f)//!Mathf.Approximately(transform.rotation.eulerAngles.sqrMagnitude, GamePlayRotation.eulerAngles.sqrMagnitude))
             {
-                transform.rotation = Quaternion.Slerp(transform.rotation, GamePlayRotation, turnSpeed / 100f);
+                transform.rotation = Quaternion.Slerp(transform.rotation, GamePlayRotation, turnSpeed / 200f);
             }
             else
             {
@@ -162,7 +162,7 @@ public class CameraScrıpt : MonoBehaviour
 
             if(Mathf.Abs(thisCam.fieldOfView - GamePlayFOV) > 2f)
             {
-                thisCam.fieldOfView = Mathf.Lerp(thisCam.fieldOfView, GamePlayFOV, turnSpeed / 100f);
+                thisCam.fieldOfView = Mathf.Lerp(thisCam.fieldOfView, GamePlayFOV, turnSpeed / 200f);
             }
             else
             {
@@ -240,31 +240,33 @@ public class CameraScrıpt : MonoBehaviour
     private Quaternion targetRotation;
     private bool rotated = false;
     private float totalAngles = 0f;
+    private float remainingAngles = 0f;
     
     Quaternion LookAtTarget(Quaternion rot)
     {
         Quaternion targetRot = Quaternion.identity;
 
-        bool rotatedBackward = followedObject.transform.forward.z < -0.4f && rotated == false;
-        bool rotateForward = followedObject.transform.forward.z > 0.2f && rotated == true;
+        var rotatedBackward = followedObject.transform.forward.z < -0.1f && rotated == false;
+        var rotateForward = followedObject.transform.forward.z > 0.4f && rotated;
         
         
         //Debug.Log(followedObject.transform.forward);
         if (rotatedBackward || rotateForward)
         {
             
-            Debug.Log((totalAngles));
+//            Debug.Log((totalAngles));
             
             if (/*Mathf.Approximately(transform.forward.z, 1f)*/ totalAngles >= 180f)
             {
-                rotated = true;
-                //targetRot = Quaternion.Euler(0f,180f,0f);
+                rotated = (rotated) ? false : true;
+                remainingAngles = 180f - totalAngles;
+              //  Debug.Log(remainingAngles);
                 totalAngles = 0f;
                 return targetRot;
             }
             
-            targetRot = Quaternion.AngleAxis(turnSpeed, Vector3.up);
-            totalAngles += turnSpeed;
+            targetRot = Quaternion.AngleAxis(180f * Time.deltaTime, Vector3.up);
+            totalAngles += 180f * Time.deltaTime;
             //targetForward = transform.eulerAngles + 180f * Vector3.up;
 
             /*  offsetToSpanned = Quaternion.AngleAxis (turnSpeed, Vector3.up) * offsetToSpanned;
@@ -273,6 +275,14 @@ public class CameraScrıpt : MonoBehaviour
               
               if(Mathf.Approximately(transform.rotation.y, 180f))
                   transform.rotation = Quaternion.Euler(transform.rotation.x,180f,transform.rotation.z);*/
+        }
+        else if (rotated && (int)Mathf.Abs(transform.eulerAngles.y) != 180)
+        {
+            targetRot = Quaternion.AngleAxis(/*180 - (int)Mathf.Abs(transform.eulerAngles.y)*/ remainingAngles,Vector3.up);
+        }
+        else if (!rotated && (int) Mathf.Abs(transform.eulerAngles.y) != 0)
+        {
+            targetRot = Quaternion.AngleAxis( /*FixEuler(transform.eulerAngles.y)*/ Mathf.Abs(remainingAngles),Vector3.up);
         }
         
         /*Vector3 relativePos = followedObject.position - transform.position;
@@ -292,4 +302,12 @@ public class CameraScrıpt : MonoBehaviour
         transform.LookAt(followedObject.position);
     }
 
+    float FixEuler(float angle) // For the angle in angleAxis, to make the error a scalar
+    {
+        if (angle > 180f)
+            return angle - 360f;
+        else
+            return angle;
+    }
+    
 }

@@ -4,10 +4,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UtmostInput;
+
 public class DefenderScript : MonoBehaviour
 {
-
     enum State
     {
         Idle,
@@ -36,6 +35,10 @@ public class DefenderScript : MonoBehaviour
     private Coroutine defenderCorountine;
 
     private float slideTime = 0f;
+
+    private Camera mainCam;
+
+    private bool cuttedWhileSliding;
     
     void Start()
     {
@@ -55,6 +58,8 @@ public class DefenderScript : MonoBehaviour
         inputController = new InputToBezierRoute(transform.position);
         defenderSlidePositions = new List<Vector3>();
 #endif
+
+        mainCam = Camera.main;
     }
 
     void Update()
@@ -70,14 +75,19 @@ public class DefenderScript : MonoBehaviour
             }
             else if(defenderCorountine != null && myState == State.Slide && slideTime > 0.5f)
             {
-                StopCoroutine(defenderCorountine);
-                
-                defenderCorountine = null;
-                
+                myState = State.Idle;
+                cuttedWhileSliding = true;
+                //StopCoroutine(defenderCorountine);
+                //defenderCorountine = null;
                 //Debug.LogError(("start run"));
-
-                defenderCorountine = StartCoroutine( RunJoyStick());
+                //defenderCorountine = StartCoroutine( RunJoyStick());
             }
+        }
+        else if (cuttedWhileSliding && defenderCorountine == null && myState == State.Idle)
+        {
+            myState = State.Running;
+
+            defenderCorountine = StartCoroutine( RunJoyStick());
         }
 
         /*  else if(running && defenderCorountine == null)
@@ -107,6 +117,9 @@ public class DefenderScript : MonoBehaviour
 
     IEnumerator RunJoyStick()
     {
+        Debug.LogError("basladim kosmaya kardas");
+
+        
         ResetAnimator();
         animator.SetBool(DataScript.animHash.defnderHash.run, true);
         
@@ -120,18 +133,25 @@ public class DefenderScript : MonoBehaviour
                 inputEnded = true;
             }
 
-            Quaternion targetRotation = Quaternion.LookRotation(inputController.moveVector);
+            Vector3 targetDirection = mainCam.transform.TransformDirection(inputController.moveVector);
+            targetDirection.y = 0f;
+            Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 15f);
 
             transform.position += transform.forward.normalized * 0.1f;
             
             yield return new WaitForEndOfFrame();
         }
+
+        //TimeEngine.SpeedDown(0.5f);
         
         Vector2 delta = inputController.LastDelta();
-        Vector3 slideRotation = new Vector3(delta.x, 0f, delta.y);
+        Vector3 slideRotation = new Vector3(delta.normalized.x, 0f, delta.normalized.y);
+        slideRotation = mainCam.transform.TransformDirection(slideRotation);
+        slideRotation.y = 0f;
+        
         Quaternion targetRotSlide = Quaternion.LookRotation(transform.forward + slideRotation);
-
+        
         float maxDistance = 7f;
         float maxVelocity = 3f;
         
@@ -151,16 +171,21 @@ public class DefenderScript : MonoBehaviour
 
             if (Mathf.Abs(Vector3.Distance(transform.position, targetPos)) < 0.5f)
                 myState = State.Idle;
-
+            
             slideTime += Time.deltaTime;
             
             yield return new WaitForEndOfFrame();
         }
 
+        //TimeEngine.SpeedUp(0.5f);
+        
+        Debug.LogError("bitirdim kosmayi kardas");
+
+        
         slideTime = 0f;
         
         animator.SetBool(DataScript.animHash.defnderHash.tackle, false);
-        animator.SetBool(DataScript.animHash.defnderHash.tackleEnd, true);
+        //animator.SetBool(DataScript.animHash.defnderHash.tackleEnd, true);
         
         StopCoroutine(defenderCorountine);
         defenderCorountine = null;
@@ -227,7 +252,7 @@ public class DefenderScript : MonoBehaviour
 
 
         animator.SetBool(DataScript.animHash.defnderHash.tackle, false);
-        animator.SetBool(DataScript.animHash.defnderHash.tackleEnd, true);
+        //animator.SetBool(DataScript.animHash.defnderHash.tackleEnd, true);
 
         DataScript.slidedDefenderCount++;
 
@@ -247,15 +272,40 @@ public class DefenderScript : MonoBehaviour
 
     public void Win()
     {
+        if (animator.GetBool(DataScript.animHash.defnderHash.tackle))
+        {
+            StartCoroutine(WaitSlideEnd());
+        }
+        else
+        {
+            ResetAnimator();
+            animator.SetBool(DataScript.animHash.defnderHash.win, true);
+        }
+    }
+    public void Lose()
+    {
+        if (animator.GetBool(DataScript.animHash.defnderHash.tackle))
+        {
+            StartCoroutine(WaitSlideEnd());
+        }
+        else
+        {
+            ResetAnimator();
+            animator.SetBool(DataScript.animHash.defnderHash.lost, true);
+        }
+    }
+    IEnumerator WaitSlideEnd()
+    {
+        while (animator.GetBool(DataScript.animHash.defnderHash.tackle))
+        {
+            yield return null;
+        }
+        
         ResetAnimator();
         animator.SetBool(DataScript.animHash.defnderHash.win, true);
     }
 
-    public void Lose()
-    {
-        ResetAnimator();
-        animator.SetBool(DataScript.animHash.defnderHash.lost, true);
-    }
+    
 
     private void ResetAnimator()
     {
