@@ -40,7 +40,6 @@ public class ManagerScript : MonoBehaviour
 
         uIManager = FindObjectOfType(typeof(UIManager)) as UIManager;
         crowdController = FindObjectOfType(typeof(CrowdController)) as CrowdController;
-        uIManager.SetScore();
 
         startingBall = transform.GetChild(0).gameObject;
         cam = Camera.main.GetComponent<CameraScrıpt>();
@@ -66,8 +65,9 @@ public class ManagerScript : MonoBehaviour
     //Lose if all defenders are slided and all attackers are not tackled
     void CheckState()
     {
-        if (DataScript.tackledAttackerCount >= DataScript.totalAttackerCount /*&& DataScript.slidedDefenderCount >= DataScript.totalDefenderCount*/ && !DataScript.isLevelPassed)
+        if (goalCount <= 0 && DataScript.tackledAttackerCount >= DataScript.totalAttackerCount /*&& DataScript.slidedDefenderCount >= DataScript.totalDefenderCount*/ && !DataScript.isLevelPassed)
         {
+            Debug.Log($"DataScript.tackledAttackerCount {DataScript.tackledAttackerCount} DataScript.totalAttackerCount {DataScript.totalAttackerCount}");
             LevelPassed();
         }
         else if (goalCount > 0)//(DataScript.slidedDefenderCount >= DataScript.totalDefenderCount) //GAME OVER! all defenders slided but not all attackers tackled
@@ -80,6 +80,11 @@ public class ManagerScript : MonoBehaviour
             else if (DataScript.goalCount == (DataScript.totalAttackerCount - DataScript.tackledAttackerCount))
             {
                 LevelFailed();
+            }
+            else if (DataScript.tackledAttackerCount >= DataScript.totalAttackerCount)
+            {
+                //burada aslinda kazanabilir. gol yemis ama hepsine celmeyi takmis oluyor
+                LevelPassed();
             }
         }
     }

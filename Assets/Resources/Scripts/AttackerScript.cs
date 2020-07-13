@@ -15,7 +15,7 @@ public class AttackerScript : MonoBehaviour
     //int dribblePointNo;
     //Vector3 dribbleTo;
 
-    bool isTackled;
+    public bool isTackled;
     private bool isShooted;
 
     Transform net;

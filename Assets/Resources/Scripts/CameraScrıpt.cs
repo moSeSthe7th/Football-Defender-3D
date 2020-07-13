@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Security.AccessControl;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -241,6 +242,7 @@ public class CameraScrıpt : MonoBehaviour
     private bool rotated = false;
     private float totalAngles = 0f;
     private float remainingAngles = 0f;
+    private int rotatedTime = 0;
     
     Quaternion LookAtTarget(Quaternion rot)
     {
@@ -290,16 +292,41 @@ public class CameraScrıpt : MonoBehaviour
         Quaternion newRotation = Quaternion.LookRotation (relativePos + y);
         transform.rotation = Quaternion.Slerp (transform.rotation, newRotation, 10f * Time.deltaTime);*/
 
-        return targetRot;
+        var angle = Quaternion.LookRotation(followedObject.forward, Vector3.up);//FixEuler(Mathf.Abs(followedObject.transform.eulerAngles.y - transform.eulerAngles.y));
+        //Debug.Log($"angle diff : {FixEuler(angle.eulerAngles.y) - FixEuler(transform.eulerAngles.y)} transform angle {transform.eulerAngles.y} angle angle {angle.eulerAngles.y}" );
+        
+        Quaternion followDirectly = Quaternion.AngleAxis(FixEuler(FixEuler(angle.eulerAngles.y) - FixEuler(transform.eulerAngles.y)) * Time.deltaTime, Vector3.up);
+        
+        float currentAngle = transform.eulerAngles.y;
+        float desiredAngle = Quaternion.LookRotation(followedObject.forward, Vector3.up).eulerAngles.y;// followedObject.transform.eulerAngles.y; 
+       
+        currentAngle = Mathf.LerpAngle(currentAngle, desiredAngle, Time.deltaTime * 1.5f );
+        
+      /*  if (currentAngle > (rotatedTime + 1) * 360f)
+            rotatedTime += 1;
+        else if (currentAngle < (rotatedTime - 1) * 360f)
+            rotatedTime -= 1;*/
+        
+        
+
+        Quaternion rotation = Quaternion.AngleAxis(/*ReverseEuler(currentAngle)*/currentAngle,Vector3.up);// Quaternion.Euler(0, FixEuler(currentAngle), 0);
+        //transform.position = followedObject.transform.position - (rotation * offsetToFollowed);
+      //  Debug.Log($"{currentAngle} and desired {ReverseEuler(desiredAngle)}");
+        //transform.LookAt(target.transform);
+        return rotation;
+       // return followDirectly;
+        //return targetRot;
+
+
     }
     
     public void Follow(Vector3 offset)
     {
         targetRotation = LookAtTarget(targetRotation);
         
-        offsetToFollowed = targetRotation * offsetToFollowed;
-        transform.position = followedObject.position + offsetToFollowed; 
-        transform.LookAt(followedObject.position);
+        offset = targetRotation * offset; // offsetToFollowed = targetRotation * offsetToFollowed;
+        transform.position = followedObject.position + offset; 
+        transform.LookAt(followedObject);
     }
 
     float FixEuler(float angle) // For the angle in angleAxis, to make the error a scalar
@@ -308,6 +335,14 @@ public class CameraScrıpt : MonoBehaviour
             return angle - 360f;
         else
             return angle;
+    }
+
+    float ReverseEuler(float angle)
+    {
+        if (angle > 0f)
+            return angle;
+        else
+            return angle + 360f;
     }
     
 }

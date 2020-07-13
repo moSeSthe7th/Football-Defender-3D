@@ -65,37 +65,50 @@ public class DefenderScript : MonoBehaviour
     void Update()
     {
 #if JOYSTICK
-        if (inputController.inputStarted && DataScript.GetState() == DataScript.GameState.onGame)
+
+        if (DataScript.isSliding && DataScript.GetState() == DataScript.GameState.onGame)
         {
-            if(defenderCorountine == null && myState == State.Idle)
+            if (inputController.inputStarted && defenderCorountine == null && myState == State.Idle)
+            {
+                myState = State.Slide;
+                defenderCorountine = StartCoroutine( SlidingTackle());
+            }
+        }
+        else if(DataScript.GetState() == DataScript.GameState.onGame)
+        {
+            if (inputController.inputStarted )
+            {
+                if(defenderCorountine == null && myState == State.Idle)
+                {
+                    myState = State.Running;
+
+                    defenderCorountine = StartCoroutine( RunJoyStick());
+                }
+                else if(defenderCorountine != null && myState == State.Slide && slideTime > 0.3f)
+                {
+                    myState = State.Idle;
+                    cuttedWhileSliding = true;
+                    //StopCoroutine(defenderCorountine);
+                    //defenderCorountine = null;
+                    //Debug.LogError(("start run"));
+                    //defenderCorountine = StartCoroutine( RunJoyStick());
+                }
+            }
+            else if (cuttedWhileSliding && defenderCorountine == null && myState == State.Idle)
             {
                 myState = State.Running;
 
                 defenderCorountine = StartCoroutine( RunJoyStick());
             }
-            else if(defenderCorountine != null && myState == State.Slide && slideTime > 0.5f)
-            {
-                myState = State.Idle;
-                cuttedWhileSliding = true;
-                //StopCoroutine(defenderCorountine);
-                //defenderCorountine = null;
-                //Debug.LogError(("start run"));
-                //defenderCorountine = StartCoroutine( RunJoyStick());
-            }
-        }
-        else if (cuttedWhileSliding && defenderCorountine == null && myState == State.Idle)
-        {
-            myState = State.Running;
 
-            defenderCorountine = StartCoroutine( RunJoyStick());
+            /*  else if(running && defenderCorountine == null)
+              {
+                  Debug.LogError(("start run"));
+                  defenderCorountine = StartCoroutine( RunJoyStick());
+              }
+      */
         }
-
-        /*  else if(running && defenderCorountine == null)
-          {
-              Debug.LogError(("start run"));
-              defenderCorountine = StartCoroutine( RunJoyStick());
-          }
-  */
+       
 #else
         if (inputController.routeComplete && !slided)
         {
@@ -163,7 +176,8 @@ public class DefenderScript : MonoBehaviour
         
         yield return new WaitForEndOfFrame();
 
-        myState = State.Slide; //enter sliding mode
+        if(myState == State.Running)
+            myState = State.Slide; //enter sliding mode
         
         while (myState == State.Slide)
         {
@@ -274,7 +288,7 @@ public class DefenderScript : MonoBehaviour
     {
         if (animator.GetBool(DataScript.animHash.defnderHash.tackle))
         {
-            StartCoroutine(WaitSlideEnd());
+            StartCoroutine(WaitSlideEnd(DataScript.animHash.defnderHash.win));
         }
         else
         {
@@ -286,7 +300,7 @@ public class DefenderScript : MonoBehaviour
     {
         if (animator.GetBool(DataScript.animHash.defnderHash.tackle))
         {
-            StartCoroutine(WaitSlideEnd());
+            StartCoroutine(WaitSlideEnd(DataScript.animHash.defnderHash.lost));
         }
         else
         {
@@ -294,7 +308,7 @@ public class DefenderScript : MonoBehaviour
             animator.SetBool(DataScript.animHash.defnderHash.lost, true);
         }
     }
-    IEnumerator WaitSlideEnd()
+    IEnumerator WaitSlideEnd(int animHash)
     {
         while (animator.GetBool(DataScript.animHash.defnderHash.tackle))
         {
@@ -302,7 +316,8 @@ public class DefenderScript : MonoBehaviour
         }
         
         ResetAnimator();
-        animator.SetBool(DataScript.animHash.defnderHash.win, true);
+        animator.SetBool(animHash, true);
+        StopAllCoroutines();
     }
 
     
@@ -321,10 +336,14 @@ public class DefenderScript : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Attacker") && myState == State.Slide)
         {
-            other.GetComponent<AttackerScript>().Tackled(transform.position);
-            DataScript.tackledAttackerCount++;
+            AttackerScript attacker = other.GetComponent<AttackerScript>();
+            if (attacker.isTackled == false)
+            {
+                attacker.Tackled(transform.position);
+                DataScript.tackledAttackerCount++;
+                vibration.vibrate(2);
+            }
 
-            vibration.vibrate(2);
         }
         else if(other.gameObject.CompareTag("Attacker"))
         {

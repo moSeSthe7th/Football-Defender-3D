@@ -92,8 +92,7 @@ public class FlowToDirection : MonoBehaviour
         gameObject.SetActive(false);
         DataScript.score++;
         PlayerPrefs.SetInt("Score", DataScript.score);
-        uIManager = FindObjectOfType(typeof(UIManager)) as UIManager;
-        uIManager.SetScore();
+        
         StopCoroutine(FlowToDefender(defender));
     }
 

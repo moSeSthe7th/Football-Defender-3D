@@ -46,4 +46,9 @@ public static class DataScript
     public static int maxLevel;
 
     public static int score;
+    
+    
+    //denemelik parametreler
+    public static bool isSliding;
+    public static bool camFollow;
 }

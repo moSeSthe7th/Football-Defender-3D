@@ -8,9 +8,10 @@ public class UIManager : MonoBehaviour
 {
     public GameObject gamePanel;
     public GameObject homePanel;
+    public GameObject settingPanel;
+    public GameObject onGamePanel;
     public Image gameButton;
     public Image homebutton;
-    public Text scoreText;
 
     Sprite startSprite;
     Sprite nextSprite;
@@ -45,6 +46,8 @@ public class UIManager : MonoBehaviour
             homebutton.sprite = levelsSprite;
             gamePanel.SetActive(true);
             homePanel.SetActive(true);
+            onGamePanel.SetActive(false);
+            settingPanel.SetActive(false);
         }
         else
         {
@@ -52,16 +55,20 @@ public class UIManager : MonoBehaviour
             StartCoroutine(CountDown());
             gamePanel.SetActive(false);
             homePanel.SetActive(false);
+            onGamePanel.SetActive(true);
+            settingPanel.SetActive(false);
         }
 
     }
 
     public void OnPressedPlay()
     {
-        if(DataScript.GetState() == DataScript.GameState.HomePage)
+        if (DataScript.GetState() == DataScript.GameState.HomePage)
         {
+            Debug.Log(DataScript.isSliding);
             pressedPlay = true;
             StartCoroutine(CountDown());
+            onGamePanel.SetActive(true);
             gamePanel.SetActive(false);
             homePanel.SetActive(false);
         }
@@ -69,6 +76,7 @@ public class UIManager : MonoBehaviour
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
         }
+
         //else if(DataScript.GetState() == DataScript.GameState.GameOver)
     }
 
@@ -86,15 +94,28 @@ public class UIManager : MonoBehaviour
             {
                 PlayerPrefs.SetInt("Current Level", 1);
             }
+
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
         }
         else //if(DataScript.GetState() == DataScript.GameState.PassedLevel)
         {
-            pressedPlay = false;
-            counted = false;
-            DataScript.ChangeState(DataScript.GameState.HomePage);
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
+            GoToHomePage();
         }
+    }
+
+    public void GoToHomePage()
+    {
+        pressedPlay = false;
+        counted = false;
+        DataScript.ChangeState(DataScript.GameState.HomePage);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
+    }
+
+    public void OnPressedSetting()
+    {
+        gamePanel.SetActive(false);
+        homePanel.SetActive(false);
+        settingPanel.SetActive(true);
     }
 
     public void GameOver()
@@ -102,19 +123,16 @@ public class UIManager : MonoBehaviour
         gameButton.sprite = restartSprite;
         homebutton.sprite = homeSprite;
         infoText.text = "GOAL!";
+        //onGamePanel.SetActive(false);
         gamePanel.SetActive(true);
     }
-
-    public void SetScore()
-    {
-        scoreText.text = DataScript.score.ToString();
-    }
-
+    
     public void LevelPassed()
     {
         gameButton.sprite = nextSprite;
         homebutton.sprite = homeSprite;
         infoText.text = "WOW!";
+        //onGamePanel.SetActive(false);
         gamePanel.SetActive(true);
     }
 
@@ -123,7 +141,7 @@ public class UIManager : MonoBehaviour
         int count = 3;
         while(count > 0)
         {
-            infoText.text = count.ToString();
+            //infoText.text = count.ToString();
             yield return new WaitForSecondsRealtime(1f);
             count--;
         }
