@@ -65,7 +65,6 @@ public class UIManager : MonoBehaviour
     {
         if (DataScript.GetState() == DataScript.GameState.HomePage)
         {
-            Debug.Log(DataScript.isSliding);
             pressedPlay = true;
             StartCoroutine(CountDown());
             onGamePanel.SetActive(true);

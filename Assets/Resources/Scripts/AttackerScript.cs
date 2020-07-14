@@ -22,7 +22,8 @@ public class AttackerScript : MonoBehaviour
     private Transform shootPos;
     
     public float attackerSpeed;
-
+    [Range(0.0f,0.75f)] public float randomOscilliation;
+    
     Coroutine dribbleBall;
     SkinnedMeshRenderer attackerRenderer;
 
@@ -119,7 +120,7 @@ public class AttackerScript : MonoBehaviour
     {
         Vector3 kickPos = transform.position;
         kickPos.z -= 1;
-        kickPos.x += Random.Range(-0.5f, 0.5f);
+        kickPos.x += Random.Range(-randomOscilliation, randomOscilliation);
         
 
         myBall.rb.AddForce((kickPos - transform.position) * 3f,ForceMode.VelocityChange);

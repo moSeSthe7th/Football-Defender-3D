@@ -19,7 +19,7 @@ public class FlowToDirection : MonoBehaviour
         Color cubeColor = RandomColorSelector();
         Material cubeMat = gameObject.GetComponent<Renderer>().material;
         cubeMat.color = cubeColor;
-        cubeMat.SetColor("_EmissionColor", cubeColor * 5f);
+        cubeMat.SetColor("_EmissionColor", cubeColor);
         cubeMat.EnableKeyword("_EMISSION");
         pointLight = gameObject.AddComponent<Light>();
         pointLight.color = cubeColor;
@@ -39,12 +39,14 @@ public class FlowToDirection : MonoBehaviour
     Color RandomColorSelector()
     {
         isColorCloseToGreen = false;
-        float randHue = Random.Range(0, 1.0f);
+        float randHue = (Random.Range(1, 3) == 1) ? Random.Range(0.00f,0.10f) : Random.Range(0.92f,1.00f);
+        float randomS = Random.Range(0.70f, 1.00f);
+        float randomV = Random.Range(0.70f, 1.00f);
         if(randHue<0.6f && randHue > 0.05f)
         {
             isColorCloseToGreen = true;
         }
-        return Color.HSVToRGB(randHue, 1, 1);
+        return Color.HSVToRGB(randHue, randomS, randomV);
     }
 
     

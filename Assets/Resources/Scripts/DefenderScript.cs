@@ -147,6 +147,7 @@ public class DefenderScript : MonoBehaviour
             }
 
             Vector3 targetDirection = mainCam.transform.TransformDirection(inputController.moveVector);
+            //targetDirection.z = inputController.moveVector.z;// * ((transform.forward.z >= -0.1f) ? 1f : -1f);
             targetDirection.y = 0f;
             Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 15f);

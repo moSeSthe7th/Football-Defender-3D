@@ -31,12 +31,14 @@ public class ManagerScript : MonoBehaviour
         DataScript.tackledAttackerCount = 0;
         DataScript.isLevelPassed = false;
         DataScript.isLevelAnimPlayed = false;
-        
 
-        DataScript.maxLevel = 3;
+        GameObject[] allMaps = Resources.LoadAll<GameObject>("Levels/");
+        int lastMap = allMaps.Length - 1;
+
+        DataScript.maxLevel = lastMap;
         DataScript.currentLevel = PlayerPrefs.GetInt("Current Level", 1);
 
-        primaryMap = Instantiate(Resources.Load<GameObject>("Levels/" + DataScript.currentLevel.ToString()), Vector3.zero, Quaternion.identity);
+        primaryMap = Instantiate(allMaps[DataScript.currentLevel - 1], Vector3.zero, Quaternion.identity);
 
         uIManager = FindObjectOfType(typeof(UIManager)) as UIManager;
         crowdController = FindObjectOfType(typeof(CrowdController)) as CrowdController;
