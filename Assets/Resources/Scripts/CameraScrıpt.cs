@@ -132,6 +132,17 @@ public class CameraScrıpt : MonoBehaviour
         }
     }
 
+    public void LookAtSmooth()
+    {
+        if (camMovement == null)
+            camMovement = StartCoroutine(LookAtSmoothCorountine());
+    }
+
+    public void ReturnSmooth()
+    {
+        if (camMovement == null)
+            camMovement = StartCoroutine(ReturnOldRotationSmooth());
+    }
 
     IEnumerator RotateOnStart()
     {
@@ -144,7 +155,7 @@ public class CameraScrıpt : MonoBehaviour
         {
             if (Vector3.Distance(transform.position, GamePlayPosition) > 2f) //!Mathf.Approximately(transform.position.sqrMagnitude, GamePlayPosition.sqrMagnitude))
             {
-                transform.position = Vector3.Lerp(transform.position, GamePlayPosition, turnSpeed / 200f);
+                transform.position = Vector3.Lerp(transform.position, GamePlayPosition, turnSpeed / 120f);
             }
             else
             {
@@ -154,7 +165,7 @@ public class CameraScrıpt : MonoBehaviour
 
             if (Vector3.Distance(transform.rotation.eulerAngles, GamePlayRotation.eulerAngles) > 5f)//!Mathf.Approximately(transform.rotation.eulerAngles.sqrMagnitude, GamePlayRotation.eulerAngles.sqrMagnitude))
             {
-                transform.rotation = Quaternion.Slerp(transform.rotation, GamePlayRotation, turnSpeed / 200f);
+                transform.rotation = Quaternion.Slerp(transform.rotation, GamePlayRotation, turnSpeed / 120f);
             }
             else
             {
@@ -164,7 +175,7 @@ public class CameraScrıpt : MonoBehaviour
 
             if(Mathf.Abs(thisCam.fieldOfView - GamePlayFOV) > 2f)
             {
-                thisCam.fieldOfView = Mathf.Lerp(thisCam.fieldOfView, GamePlayFOV, turnSpeed / 200f);
+                thisCam.fieldOfView = Mathf.Lerp(thisCam.fieldOfView, GamePlayFOV, turnSpeed / 120f);
             }
             else
             {
@@ -177,7 +188,7 @@ public class CameraScrıpt : MonoBehaviour
 
         offsetToFollowed = transform.position - followedObject.position;
 
-        camState = CameraState.OnGame;
+        camState = CameraState.Follow;
         StopCoroutine(camMovement);
         camMovement = null;
 
@@ -191,19 +202,18 @@ public class CameraScrıpt : MonoBehaviour
         //yield return new WaitForSeconds(1f);
 
         bool spanned = false;
-
         Vector3 spanPos = spannedObj.position;
-        
         Vector3 offset = new Vector3(0f, 2f, -3f);
         
         while(!spanned)
-        {
+        { 
+            spanPos = spannedObj.position;
             
             float distanceToSpan = Vector3.Distance(transform.position, spanPos + (Vector3.down * downModifier) + offset);
             
             if (distanceToSpan > 1f)
             {
-                transform.position = Vector3.Lerp(transform.position, spanPos + (Vector3.down * downModifier) + offset, speed / 150f);
+                transform.position = Vector3.Lerp(transform.position, spanPos + (Vector3.down * downModifier) + offset, speed / 80f);
 
                 //if(distanceToSpan < 5f)
                 {
@@ -239,46 +249,180 @@ public class CameraScrıpt : MonoBehaviour
         SpanTo(character,speed);
     }
 
+    IEnumerator ReturnOldRotationSmooth()
+    {
+        camState = CameraState.OnCorountine;
+        
+        bool returned = false;
+        float totalAngles = FixEuler(oldRotation - FixEuler(transform.eulerAngles.y));
+        float speed = turnSpeed * 0.4f;
+
+ //       bool isBigger = ((transform.eulerAngles.y) > FixEuler(oldRotation));
+        float totRoatedAmount = 0f;
+        while (returned == false)
+        {
+            float rot = Mathf.LerpAngle(transform.eulerAngles.y, (oldRotation), Time.deltaTime);
+        
+            Quaternion targetRot = Quaternion.AngleAxis(rot,Vector3.up);
+
+            targetRot = Quaternion.AngleAxis((speed * Time.deltaTime * totalAngles), Vector3.up);
+            totRoatedAmount += speed * Time.deltaTime * Mathf.Abs(totalAngles);
+            
+            offsetToFollowed = targetRot * offsetToFollowed; // offsetToFollowed = targetRotation * offsetToFollowed;
+            transform.position = followedObject.position + offsetToFollowed; 
+            transform.LookAt(followedObject);
+
+            if (totRoatedAmount >= Mathf.Abs(totalAngles) /*|| Mathf.Abs(transform.eulerAngles.y - FixEuler(oldRotation)) < 5f || (isBigger &&  FixEuler(oldRotation) > (transform.eulerAngles.y) || (isBigger == false && FixEuler(oldRotation) < (transform.eulerAngles.y)))*/)
+            {
+                Debug.Log($"ReturnOldRotationSmooth looked angle : { transform.eulerAngles.y} and totalAngle {totalAngles } and totRitated {totRoatedAmount} and oldrotation is {oldRotation}");
+                returned = true;
+            }
+            
+            yield return  new WaitForEndOfFrame();
+        }
+        
+        camState = CameraState.Follow;
+        StopCoroutine(camMovement);
+        camMovement = null;
+    }
+
+    
+    IEnumerator LookAtSmoothCorountine()
+    {
+        camState = CameraState.OnCorountine;
+
+        oldRotation = FixEuler(transform.eulerAngles.y);
+        bool looked = false;
+        float desiredAngle = FixEuler(followedObject.eulerAngles.y);// followedObject.transform.eulerAngles.y; 
+        float totalAngles = FixEuler(FixEuler(desiredAngle) - FixEuler(transform.eulerAngles.y));
+       //bool isBigger = (transform.eulerAngles.y > FixEuler(desiredAngle));
+        float speed = turnSpeed * 0.4f;
+        float totRoatedAmount = 0f;
+        while (looked == false)
+        { 
+            desiredAngle = followedObject.eulerAngles.y;// followedObject.transform.eulerAngles.y; 
+
+            float rot = Mathf.LerpAngle(transform.eulerAngles.y, FixEuler(desiredAngle), Time.deltaTime);
+
+            Quaternion targetRot = Quaternion.AngleAxis(rot,Vector3.up);
+
+            targetRot = Quaternion.AngleAxis((speed * Time.deltaTime * totalAngles), Vector3.up);
+            totRoatedAmount += speed * Time.deltaTime * Mathf.Abs(totalAngles);
+            
+            offsetToFollowed = targetRot * offsetToFollowed; // offsetToFollowed = targetRotation * offsetToFollowed;
+            transform.position = followedObject.position + offsetToFollowed; 
+            transform.LookAt(followedObject);
+
+            if (totRoatedAmount >= Mathf.Abs(totalAngles)/* || Mathf.Abs(transform.eulerAngles.y - desiredAngle) < 5f || (isBigger &&  FixEuler(desiredAngle) > transform.eulerAngles.y) || (isBigger == false && FixEuler(desiredAngle) < transform.eulerAngles.y)*/)
+            {
+                Debug.Log($"LookAtSmoothCorountine looked angle : { transform.eulerAngles.y} and totalAngle {totalAngles } and totRitated {totRoatedAmount} and desired is { desiredAngle}");
+                looked = true;
+            }
+            
+            yield return  new WaitForEndOfFrame();
+        }
+
+        camState = CameraState.Follow;
+        StopCoroutine(camMovement);
+        camMovement = null;
+    }
+    
     private Quaternion targetRotation;
     private bool rotated = false;
-    private float totalAngles = 0f;
-    private float remainingAngles = 0f;
-    private int rotatedTime = 0;
+    private bool followedTurned = false;
+    private bool rotating = false;
+    //private bool
     
-    private float rotationDegreesPerSecond = 90f;
-    private float rotationDegreesAmount = 180f;
+    private readonly float rotationDegreesPerSecond = 90f;
+    private readonly float rotationDegreesAmount = 180f;
+    private float rotateBackAmount = 0f;
+    private float rotateForwardAmount = 0f;
     private float totalRotation = 0;
-    
-    Quaternion LookAtTarget(Quaternion rot)
+    private float oldRotation = 0f;
+
+    Quaternion LookAtTarget()
     {
         Quaternion targetRot = Quaternion.AngleAxis(0f,Vector3.up);
 
-        var rotatedBackward = followedObject.transform.forward.z < -0.4f && rotated == false;
-        var rotateForward = followedObject.transform.forward.z > 0.1f && rotated;
+        float speed = turnSpeed * 0.4f;
         
+        float direction = followedObject.transform.forward.z;
         
+        var rotatedBackward = direction < 0.2f && rotated == false;
+        var rotateForward = direction > -0.2f && rotated;
+
+        //eger donuyorsa ve (duzden geriye donuyorsa veya geriden duze donuyorsa)
+        var rotatedAgainWhileRotating = rotating && ((rotated == false && direction > 0.2f) || (rotated && direction < -0.2f));
+
         //Debug.Log(followedObject.transform.forward);
         if (rotatedBackward || rotateForward)
         {
+            if (rotating == false)
+            {
+                rotateForwardAmount = rotationDegreesAmount;
+                rotating = true;
+            }
             
-         if(Mathf.Abs(totalRotation) >= Mathf.Abs(rotationDegreesAmount))
-         {             Debug.LogError($" donme bitti {transform.eulerAngles.y } and total rot is {totalRotation} and rotationDegreesAmount { rotationDegreesAmount}");
+            //player turned again while camera rotated, but then again. go back and forw
+            if (followedTurned)
+            {
+                followedTurned = false;
+                rotateForwardAmount -= totalRotation;
+            }
 
-             rotated = (!rotated);
-             totalRotation = 0f;
-             return targetRot;
-         }
+            if(Mathf.Abs(totalRotation) >= Mathf.Abs(rotateForwardAmount))
+            {             //Debug.LogError($" donme bitti {transform.eulerAngles.y } and total rot is {totalRotation} and rotationDegreesAmount { rotationDegreesAmount}");
+                rotating = false;
+                followedTurned = false;
+                rotated = (!rotated);
+                
+                //Debug.Log($"{rotateForwardAmount} and {totalRotation}");
+                targetRot = Quaternion.AngleAxis(rotationDegreesAmount - totalRotation, Vector3.up);
+                
+                totalRotation = 0f;
+                rotateForwardAmount = 0f;
+                rotateBackAmount = 0f;
+                
+                return targetRot;
+            }
          
-         Debug.Log($" donuyorrr {transform.eulerAngles.y } and forward is {followedObject.transform.forward.z}");
+            //Debug.Log($" donuyorrr {transform.eulerAngles.y } and forward is {followedObject.transform.forward.z}");
+            //float rot = Mathf.LerpAngle(transform.eulerAngles.y, (rotatedBackward) ? -180f : 0f, Time.deltaTime * speed);
+        
+          // Quaternion targetRot = Quaternion.AngleAxis(rot1,Vector3.up);
            
-         float currentAngle2 = transform.rotation.eulerAngles.y;
-         targetRot = 
-             Quaternion.AngleAxis(( 0.1f * rotationDegreesPerSecond), Vector3.up);
-                totalRotation += 0.1f * rotationDegreesPerSecond;
+           
+            targetRot = Quaternion.AngleAxis((speed * Time.deltaTime * rotationDegreesPerSecond), Vector3.up);
+            totalRotation += speed * Time.deltaTime * rotationDegreesPerSecond;
             
         }
-        
+        else if (rotatedAgainWhileRotating)
+        {
+            if (followedTurned == false)
+            {
+                followedTurned = true;
+                rotateBackAmount = totalRotation;
+            }
+            
+            
+            if(totalRotation <= 0f)
+            {             //Debug.LogError($" donme bitti {transform.eulerAngles.y } and total rot is {totalRotation} and rotationDegreesAmount { rotationDegreesAmount}");
+                rotating = false;
+                followedTurned = false;
+                
+                //targetRot = Quaternion.AngleAxis(rotationDegreesAmount - totalRotation, Vector3.up);
 
+                totalRotation = 0f;
+                rotateForwardAmount = 0f;
+                rotateBackAmount = 0f;
+                return targetRot;
+            }
+            
+            targetRot = Quaternion.AngleAxis(( -speed * Time.deltaTime * rotationDegreesPerSecond), Vector3.up);
+            totalRotation -= speed * Time.deltaTime * rotationDegreesPerSecond;
+        }
+       
+/*
         var angle = Quaternion.LookRotation(followedObject.forward, Vector3.up);//FixEuler(Mathf.Abs(followedObject.transform.eulerAngles.y - transform.eulerAngles.y));
         //Debug.Log($"angle diff : {FixEuler(angle.eulerAngles.y) - FixEuler(transform.eulerAngles.y)} transform angle {transform.eulerAngles.y} angle angle {angle.eulerAngles.y}" );
         
@@ -288,12 +432,9 @@ public class CameraScrıpt : MonoBehaviour
         float desiredAngle = Quaternion.LookRotation(followedObject.forward, Vector3.up).eulerAngles.y;// followedObject.transform.eulerAngles.y; 
        
         currentAngle = Mathf.LerpAngle(currentAngle, desiredAngle, Time.deltaTime * 1.5f );
-        
-
-        
 
         Quaternion rotation = Quaternion.AngleAxis(ReverseEuler(currentAngle),Vector3.up);// Quaternion.Euler(0, FixEuler(currentAngle), 0);
-
+*/
         
         
         return targetRot;
@@ -303,7 +444,7 @@ public class CameraScrıpt : MonoBehaviour
     
     public void Follow(Vector3 offset)
     {
-        targetRotation = LookAtTarget(targetRotation);
+        targetRotation = LookAtTarget();
         
         offsetToFollowed = targetRotation * offsetToFollowed; // offsetToFollowed = targetRotation * offsetToFollowed;
         transform.position = followedObject.position + offsetToFollowed; 
@@ -315,7 +456,9 @@ public class CameraScrıpt : MonoBehaviour
     float FixEuler(float angle) // For the angle in angleAxis, to make the error a scalar
     {
         if (angle > 180f)
-            return angle - 360f;
+            return FixEuler(angle - 360f);
+        else if (angle < -180f)
+            return FixEuler(360f + angle);
         else
             return angle;
     }

@@ -5,30 +5,38 @@ using UnityEngine;
 
 public class InputToBezierRoute : InputController
 {
+    public Transform targetTransform;
     List<Vector3> bezierControlPoints;
     int controlPointCount;
+    public bool startBezier = false;
 
     public List<Vector3> bezierPoints;
     public bool routeComplete = false; //defender will check this routeComplete flag in order to start sliding
 
-    public InputToBezierRoute(Vector3 startPos) : base(startPos) 
+    public InputToBezierRoute(Transform startTransfrom) : base(startTransfrom.position)
     {
+        targetTransform = startTransfrom;
+        
         controlPointCount = 4;
         bezierControlPoints = new List<Vector3>(controlPointCount);
 
         touchPositions = new List<Vector3>();
+        
+        startBezier = false;
+        routeComplete = false;
     }
 
     protected override void OnTouchStarted(Vector2 touchPos)
     {
-        if(canPlayerMove)
+        if (canPlayerMove && startBezier)
         {
             touchPositions.Clear();
-
+//Debug.Log($"started bezier ");
             touchStarted = true;
             AddTouchPoisition(touchPos);
 
             bezierControlPoints.Clear();
+            startingPosition = targetTransform.position;
         }
 
     }
@@ -93,6 +101,15 @@ public class InputToBezierRoute : InputController
         }
 
         return bPoints;
+    }
+
+    public void Reset()
+    {
+        bezierControlPoints.Clear();
+        controlPointCount = 0;
+        startBezier = false;
+        bezierPoints.Clear();
+        routeComplete = false; 
     }
 
     void CreateDebugObject()

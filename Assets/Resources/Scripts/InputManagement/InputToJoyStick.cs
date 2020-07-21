@@ -7,7 +7,7 @@ public class InputToJoyStick : InputController
 {
     public Transform targetTransform;
     public Vector3 moveVector;
-    public float sharpness = 15f;
+    public float sharpness = 20f;
     public bool inputStarted; //return only true in the update input started
     
     bool isStaniory { get; set; }
@@ -94,6 +94,9 @@ public class InputToJoyStick : InputController
         Vector2 delta = Vector2.ClampMagnitude(posDelta, maxVelocity);// max speed
         moveVector = new Vector3(delta.x, 0f, delta.y);
 
+        
+        moveVector =  Camera.main.transform.TransformDirection(moveVector);
+        moveVector.y = 0f;
         // Debug.Log("Movement Vector is : " + movementVec + " Position is :" + transform.position);
         //targetTransform.position += movementVec;//  Vector3.Lerp(transform.position, movementVec, speedModifier * Time.deltaTime);
                                           // Debug.Log("New transform position is : " + transform.position); 

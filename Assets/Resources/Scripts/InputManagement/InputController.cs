@@ -86,7 +86,7 @@ public class InputController : IDisposable
 
         if (Physics.Raycast(ray, out raycastHit))
         {
-            if (raycastHit.transform.gameObject.tag == "Pitch")
+            if (raycastHit.transform.gameObject.CompareTag("Pitch") || raycastHit.transform.gameObject.CompareTag("Attacker"))
             {
                 touchPositions.Add(raycastHit.point);
                 return true;

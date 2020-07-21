@@ -15,6 +15,7 @@ public class ManagerScript : MonoBehaviour
     GameObject startingParticleSys;
 
     private DefenderScript player;
+    private List<AttackerScript> attackers;
 
     bool fasted = false;
   
@@ -31,7 +32,9 @@ public class ManagerScript : MonoBehaviour
         DataScript.tackledAttackerCount = 0;
         DataScript.isLevelPassed = false;
         DataScript.isLevelAnimPlayed = false;
-
+        DataScript.isOnSlowDown = false;
+        DataScript.isOnSpeedUp = false;
+        
         GameObject[] allMaps = Resources.LoadAll<GameObject>("Levels/");
         int lastMap = allMaps.Length - 1;
 
@@ -43,11 +46,13 @@ public class ManagerScript : MonoBehaviour
         uIManager = FindObjectOfType(typeof(UIManager)) as UIManager;
         crowdController = FindObjectOfType(typeof(CrowdController)) as CrowdController;
 
+        player = primaryMap.GetComponentInChildren<DefenderScript>();
+        attackers = new List<AttackerScript>();
+        attackers.AddRange(primaryMap.GetComponentsInChildren<AttackerScript>());
+
         startingBall = transform.GetChild(0).gameObject;
         cam = Camera.main.GetComponent<CameraScrıpt>();
-        cam.followedObject = primaryMap.GetComponentInChildren<DefenderScript>().transform;
-        
-        player = GameObject.FindWithTag("Defender").GetComponent<DefenderScript>();
+        cam.followedObject =player.transform;
 
         StartCoroutine(GameStartCorountine());
     }
@@ -89,6 +94,16 @@ public class ManagerScript : MonoBehaviour
                 LevelPassed();
             }
         }
+        else if (DataScript.isOnSlowDown)
+        {
+            SlowDownAll();
+            DataScript.isOnSlowDown = false;
+        }
+        else if (DataScript.isOnSpeedUp)
+        {
+            SpeedUpAll();
+            DataScript.isOnSpeedUp = false;
+        }
     }
 
     void SpeedUpGame()
@@ -102,6 +117,46 @@ public class ManagerScript : MonoBehaviour
         TimeEngine.DefaultSpeed();
     }
 
+    public void SlowDownAll()
+    {
+        float slowDownRatio = 10f;
+        
+        //slow down attackers
+        foreach (var attacker in attackers)
+        {
+            attacker.attackerSpeed /= slowDownRatio;
+            attacker.attackerAnimator.speed /= slowDownRatio;
+            attacker.myBall.rb.drag += slowDownRatio;
+        }
+        
+        //slow down defender
+        player.defenderSpeed /= slowDownRatio;
+        player.animator.speed /= slowDownRatio;
+        
+        //set camera
+        cam.LookAtSmooth();
+    }
+
+    public void SpeedUpAll()
+    {
+        float speedUpRatio = 10f;
+        
+        //speed up attackers
+        foreach (var attacker in attackers)
+        {
+            attacker.attackerSpeed *= speedUpRatio;
+            attacker.attackerAnimator.speed *= speedUpRatio;
+            attacker.myBall.rb.drag -= speedUpRatio;
+        }
+        
+        //speed up defender
+        player.defenderSpeed *= speedUpRatio;
+        player.animator.speed *= speedUpRatio;
+        
+        //set camera
+        cam.ReturnSmooth();
+    }
+    
     IEnumerator LevelPassedAnimations()
     {
        // GameObject defender = GameObject.FindWithTag("Defender");

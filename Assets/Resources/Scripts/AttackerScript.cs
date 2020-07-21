@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class AttackerScript : MonoBehaviour
 {
-    Animator attackerAnimator;
+    public Animator attackerAnimator;
 
     public Transform cubeReplica;
 
-    BallScript myBall;
+    public BallScript myBall;
 
     Rigidbody[] rigidbodies;
     //Transform[] dribblePoints;

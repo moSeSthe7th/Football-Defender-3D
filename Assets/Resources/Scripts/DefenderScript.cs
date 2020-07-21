@@ -16,22 +16,21 @@ public class DefenderScript : MonoBehaviour
         Lost
     }
     
-    Animator animator;
+    public Animator animator;
     Rigidbody defenderRb;
 
     private State myState;
     
 #if JOYSTICK
         InputToJoyStick inputController;
+        private InputToBezierRoute inputBezierController;
 #else
         InputToBezierRoute inputController;
 #endif
     List<Vector3> defenderSlidePositions;
-    [Range(1f,10f)]public float defenderSpeed;
+    public float defenderSpeed;
     
-
     VibrationHandler vibration;
-
     private Coroutine defenderCorountine;
 
     private float slideTime = 0f;
@@ -47,18 +46,19 @@ public class DefenderScript : MonoBehaviour
         vibration = new VibrationHandler();
 
         DataScript.totalDefenderCount++;
-
-        defenderSpeed = 2f;
-
+        
         myState = State.Idle;
 
 #if JOYSTICK
         inputController = new InputToJoyStick(transform);
+        inputBezierController = new InputToBezierRoute(transform);
 #else
         inputController = new InputToBezierRoute(transform.position);
-        defenderSlidePositions = new List<Vector3>();
+        //defenderSlidePositions = new List<Vector3>();
 #endif
-
+        defenderSlidePositions = new List<Vector3>();
+        defenderSpeed = 15f;
+        
         mainCam = Camera.main;
     }
 
@@ -76,7 +76,7 @@ public class DefenderScript : MonoBehaviour
         }
         else if(DataScript.GetState() == DataScript.GameState.onGame)
         {
-            if (inputController.inputStarted )
+            if (inputController.inputStarted)
             {
                 if(defenderCorountine == null && myState == State.Idle)
                 {
@@ -97,7 +97,6 @@ public class DefenderScript : MonoBehaviour
             else if (cuttedWhileSliding && defenderCorountine == null && myState == State.Idle)
             {
                 myState = State.Running;
-
                 defenderCorountine = StartCoroutine( RunJoyStick());
             }
 
@@ -136,7 +135,6 @@ public class DefenderScript : MonoBehaviour
         ResetAnimator();
         animator.SetBool(DataScript.animHash.defnderHash.run, true);
         
-        float runSpeed = defenderSpeed;
         bool inputEnded = false;
 
         while(!inputEnded)
@@ -146,11 +144,11 @@ public class DefenderScript : MonoBehaviour
                 inputEnded = true;
             }
 
-            Vector3 targetDirection = mainCam.transform.TransformDirection(inputController.moveVector);
+            Vector3 targetDirection = inputController.moveVector;//mainCam.transform.TransformDirection(inputController.moveVector);
             //targetDirection.z = inputController.moveVector.z;// * ((transform.forward.z >= -0.1f) ? 1f : -1f);
-            targetDirection.y = 0f;
+           
             Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 15f);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, defenderSpeed);
 
             transform.position += transform.forward.normalized * 0.1f;
             
@@ -169,18 +167,19 @@ public class DefenderScript : MonoBehaviour
         float maxDistance = 7f;
         float maxVelocity = 3f;
         
-        transform.rotation = targetRotSlide;
+        //transform.rotation = targetRotSlide;
         Vector3 targetPos = transform.position + (transform.forward * maxDistance);
         
-        animator.SetBool(DataScript.animHash.defnderHash.run, false);
-        animator.SetBool(DataScript.animHash.defnderHash.tackle, true);
+        //animator.SetBool(DataScript.animHash.defnderHash.run, false);
+        //animator.SetBool(DataScript.animHash.defnderHash.tackle, true);
         
         yield return new WaitForEndOfFrame();
 
         if(myState == State.Running)
             myState = State.Slide; //enter sliding mode
         
-        while (myState == State.Slide)
+        
+       /* while (myState == State.Slide)
         {
             transform.position = Vector3.Lerp(transform.position, targetPos, maxVelocity * Time.deltaTime);
 
@@ -201,10 +200,78 @@ public class DefenderScript : MonoBehaviour
         
         animator.SetBool(DataScript.animHash.defnderHash.tackle, false);
         //animator.SetBool(DataScript.animHash.defnderHash.tackleEnd, true);
+        */
+        StopCoroutine(defenderCorountine);
+        defenderCorountine = null;
+
+        DataScript.isOnSlowDown = true;
+        
+        if(DataScript.GetState() == DataScript.GameState.onGame)
+            StartSlidingBezier();
+    }
+
+    void StartSlidingBezier()
+    {
+        if (defenderCorountine == null)
+            defenderCorountine = StartCoroutine(SlidingBezier());
+    }
+
+    IEnumerator SlidingBezier()
+    {
+        inputBezierController.startBezier = true;
+        
+        animator.SetBool(DataScript.animHash.defnderHash.run, false);
+        animator.SetBool(DataScript.animHash.defnderHash.tackle, true);
+
+        
+        while (inputBezierController.routeComplete == false)
+        {
+            //inputBezierController.routeComplete = true;
+            yield return new WaitForEndOfFrame();
+        }
+
+        DataScript.isOnSpeedUp = true;
+        
+        defenderSlidePositions = inputBezierController.bezierPoints;
+
+        inputBezierController.startBezier = false;
+
+        for (int i = 0; i < defenderSlidePositions.Count - 1; i++)
+        {
+            Vector3 slidePosition = new Vector3(defenderSlidePositions[i].x, transform.position.y, defenderSlidePositions[i].z);
+
+            while (Vector3.SqrMagnitude(slidePosition - transform.position) > 0.01f && myState == State.Slide)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(slidePosition - transform.position);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, defenderSpeed * Time.deltaTime);
+
+                Vector3 newPosition = Vector3.MoveTowards(defenderRb.position, slidePosition, defenderSpeed * Time.deltaTime);
+
+                //defenderRb.MovePosition(newPosition);
+                transform.position = Vector3.MoveTowards(transform.position, slidePosition, defenderSpeed * Time.deltaTime);
+                
+                slideTime += Time.deltaTime;
+                
+                yield return new WaitForEndOfFrame();
+            }
+            
+            if (myState == State.Idle)
+                break;
+        }
+
+        inputBezierController.Reset();
+
+        if (myState != State.Idle)
+            myState = State.Idle;
+        
+        animator.SetBool(DataScript.animHash.defnderHash.tackle, false);
+        
+        slideTime = 0f;
         
         StopCoroutine(defenderCorountine);
         defenderCorountine = null;
     }
+
 
     IEnumerator SlidingTackle()
     {
@@ -212,10 +279,12 @@ public class DefenderScript : MonoBehaviour
 
 #if JOYSTICK
 
-        float slideSpeed = defenderSpeed;
+        float slideSpeed = defenderSpeed / 2f;
         bool slideEnded = false;
         bool onSlowDown = false;
 
+        Debug.Log("slided");
+        
         while(!slideEnded)
         {
             if(!inputController.isPresssing() || DataScript.GetState() != DataScript.GameState.onGame) // The game is over start slow down, than the tackeling will be end
@@ -225,7 +294,7 @@ public class DefenderScript : MonoBehaviour
 
             if (onSlowDown)
             {
-                slideSpeed = Mathf.Lerp(slideSpeed,0f, 0.2f);
+                slideSpeed = Mathf.Lerp(slideSpeed,0f, 0.5f);
                 
                 if(slideSpeed <= 0.1f)
                 {
@@ -238,9 +307,9 @@ public class DefenderScript : MonoBehaviour
             {
                 slideEnded = true; // break while loop since player did not played a while
             }
-
-            transform.position = Vector3.Lerp(transform.position, inputController.targetTransform.position, slideSpeed / 10f);
-            transform.rotation = Quaternion.Slerp(transform.rotation, inputController.targetTransform.rotation, slideSpeed / 10f); //inputController.targetTransform.rotation;
+            
+            transform.position = Vector3.Lerp(transform.position, inputController.targetTransform.position, slideSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, inputController.targetTransform.rotation, slideSpeed * Time.deltaTime); //inputController.targetTransform.rotation;
 
             yield return new WaitForEndOfFrame();
         }
@@ -270,18 +339,12 @@ public class DefenderScript : MonoBehaviour
         //animator.SetBool(DataScript.animHash.defnderHash.tackleEnd, true);
 
         DataScript.slidedDefenderCount++;
-
-        yield return new WaitForEndOfFrame();//WaitForSeconds(0.1f);
-
-        if (!DataScript.isLevelPassed)
-        {
-            animator.SetBool(DataScript.animHash.defnderHash.lost, true);
-        }
-        else
-        {
-            animator.SetBool(DataScript.animHash.defnderHash.win, true);
-        }
-
+        myState = State.Idle;
+        
+        //yield return new WaitForEndOfFrame();//WaitForSeconds(0.1f);
+        
+        StopCoroutine(defenderCorountine);
+        defenderCorountine = null;
     }
 
 
