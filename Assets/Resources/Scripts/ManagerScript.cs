@@ -17,7 +17,8 @@ public class ManagerScript : MonoBehaviour
     private DefenderScript player;
     private List<AttackerScript> attackers;
 
-    bool fasted = false;
+    private bool slowed = false;
+    private bool failed = false;
   
     void Start()
     {
@@ -64,6 +65,7 @@ public class ManagerScript : MonoBehaviour
        if(DataScript.GetState() == DataScript.GameState.onGame)
        {
             CheckState();
+            CheckSpeedState();
        }
     }
 
@@ -79,9 +81,9 @@ public class ManagerScript : MonoBehaviour
         }
         else if (goalCount > 0)//(DataScript.slidedDefenderCount >= DataScript.totalDefenderCount) //GAME OVER! all defenders slided but not all attackers tackled
         {
-            if (!fasted && DataScript.goalCount <= (DataScript.totalAttackerCount - DataScript.tackledAttackerCount))
+            if (!failed && DataScript.goalCount <= (DataScript.totalAttackerCount - DataScript.tackledAttackerCount))
             {
-                fasted = true;
+                failed = true;
                 SpeedUpGame();
             }
             else if (DataScript.goalCount == (DataScript.totalAttackerCount - DataScript.tackledAttackerCount))
@@ -94,16 +96,30 @@ public class ManagerScript : MonoBehaviour
                 LevelPassed();
             }
         }
-        else if (DataScript.isOnSlowDown)
+    }
+
+
+    void CheckSpeedState()
+    {
+        if (DataScript.isOnSlowDown && slowed == false)
         {
             SlowDownAll();
+            slowed = true;
             DataScript.isOnSlowDown = false;
         }
-        else if (DataScript.isOnSpeedUp)
+        else if (DataScript.isOnSpeedUp && slowed)
         {
             SpeedUpAll();
+            slowed = false;
             DataScript.isOnSpeedUp = false;
         }
+        else if(slowed && failed)
+        {
+            SpeedUpAll();
+            player.Lose();
+            slowed = false;
+        }
+        
     }
 
     void SpeedUpGame()

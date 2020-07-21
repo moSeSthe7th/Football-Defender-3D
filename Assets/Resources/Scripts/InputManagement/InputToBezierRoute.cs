@@ -19,7 +19,7 @@ public class InputToBezierRoute : InputController
         
         controlPointCount = 4;
         bezierControlPoints = new List<Vector3>(controlPointCount);
-
+        bezierPoints = new List<Vector3>();
         touchPositions = new List<Vector3>();
         
         startBezier = false;

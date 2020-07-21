@@ -204,7 +204,6 @@ public class DefenderScript : MonoBehaviour
         StopCoroutine(defenderCorountine);
         defenderCorountine = null;
 
-        DataScript.isOnSlowDown = true;
         
         if(DataScript.GetState() == DataScript.GameState.onGame)
             StartSlidingBezier();
@@ -218,6 +217,8 @@ public class DefenderScript : MonoBehaviour
 
     IEnumerator SlidingBezier()
     {
+        DataScript.isOnSlowDown = true;//slow down all characters on manager update
+
         inputBezierController.startBezier = true;
         
         animator.SetBool(DataScript.animHash.defnderHash.run, false);
@@ -230,8 +231,15 @@ public class DefenderScript : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
 
-        DataScript.isOnSpeedUp = true;
-        
+        DataScript.isOnSpeedUp = true;//speed up all characters on manager update
+
+  /*      if (!inputBezierController.routeComplete)
+        {
+            ResetAnimator();
+            StopCoroutine(defenderCorountine);
+            defenderCorountine = null;
+        }
+        */
         defenderSlidePositions = inputBezierController.bezierPoints;
 
         inputBezierController.startBezier = false;
@@ -265,6 +273,7 @@ public class DefenderScript : MonoBehaviour
             myState = State.Idle;
         
         animator.SetBool(DataScript.animHash.defnderHash.tackle, false);
+        animator.SetBool(DataScript.animHash.defnderHash.run, false);
         
         slideTime = 0f;
         
@@ -279,7 +288,7 @@ public class DefenderScript : MonoBehaviour
 
 #if JOYSTICK
 
-        float slideSpeed = defenderSpeed / 2f;
+        float slideSpeed = defenderSpeed / 5f;
         bool slideEnded = false;
         bool onSlowDown = false;
 
@@ -350,7 +359,11 @@ public class DefenderScript : MonoBehaviour
 
     public void Win()
     {
-        if (animator.GetBool(DataScript.animHash.defnderHash.tackle))
+        ResetPlayer();
+        animator.SetBool(DataScript.animHash.defnderHash.win, true);
+
+        
+       /* if (animator.GetBool(DataScript.animHash.defnderHash.tackle))
         {
             StartCoroutine(WaitSlideEnd(DataScript.animHash.defnderHash.win));
         }
@@ -358,10 +371,13 @@ public class DefenderScript : MonoBehaviour
         {
             ResetAnimator();
             animator.SetBool(DataScript.animHash.defnderHash.win, true);
-        }
+        }*/
     }
     public void Lose()
     {
+        ResetPlayer();
+        animator.SetBool(DataScript.animHash.defnderHash.lost, true);
+/*
         if (animator.GetBool(DataScript.animHash.defnderHash.tackle))
         {
             StartCoroutine(WaitSlideEnd(DataScript.animHash.defnderHash.lost));
@@ -370,21 +386,30 @@ public class DefenderScript : MonoBehaviour
         {
             ResetAnimator();
             animator.SetBool(DataScript.animHash.defnderHash.lost, true);
-        }
+        }*/
     }
     IEnumerator WaitSlideEnd(int animHash)
     {
         while (animator.GetBool(DataScript.animHash.defnderHash.tackle))
         {
-            yield return null;
+            yield return new WaitForEndOfFrame();
         }
-        
-        ResetAnimator();
+
+        ResetPlayer();
         animator.SetBool(animHash, true);
-        StopAllCoroutines();
     }
 
-    
+    private void ResetPlayer()
+    {
+        inputBezierController.Reset();
+
+        if (myState != State.Idle)
+            myState = State.Idle;
+        
+        StopAllCoroutines();
+        ResetAnimator();
+
+    }
 
     private void ResetAnimator()
     {

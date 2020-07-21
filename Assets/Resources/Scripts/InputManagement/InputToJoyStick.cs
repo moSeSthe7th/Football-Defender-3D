@@ -7,7 +7,7 @@ public class InputToJoyStick : InputController
 {
     public Transform targetTransform;
     public Vector3 moveVector;
-    public float sharpness = 20f;
+    public float sharpness = 25f;
     public bool inputStarted; //return only true in the update input started
     
     bool isStaniory { get; set; }
