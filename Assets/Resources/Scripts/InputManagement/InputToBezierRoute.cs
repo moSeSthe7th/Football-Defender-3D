@@ -13,9 +13,15 @@ public class InputToBezierRoute : InputController
     public List<Vector3> bezierPoints;
     public bool routeComplete = false; //defender will check this routeComplete flag in order to start sliding
 
-    public InputToBezierRoute(Transform startTransfrom) : base(startTransfrom.position)
+    private LineRenderer line;
+    
+    public InputToBezierRoute(Transform startTransfrom,LineRenderer lineRenderer) : base(startTransfrom.position)
     {
         targetTransform = startTransfrom;
+        line = lineRenderer;
+        line.positionCount = 0;
+        line.SetPositions(new Vector3[]{ });
+        line.enabled = false;
         
         controlPointCount = 4;
         bezierControlPoints = new List<Vector3>(controlPointCount);
@@ -31,16 +37,31 @@ public class InputToBezierRoute : InputController
         if (canPlayerMove && startBezier)
         {
             touchPositions.Clear();
-//Debug.Log($"started bezier ");
+Debug.Log($"started bezier ");
             touchStarted = true;
             AddTouchPoisition(touchPos);
-
+            
+            line.enabled = true;
+            
+            line.positionCount = touchPositions.Count;
+            line.SetPositions(touchPositions.ToArray());
+            
             bezierControlPoints.Clear();
             startingPosition = targetTransform.position;
         }
 
     }
 
+    protected override void OnTouch(Vector2 touchPos)
+    {
+        if (touchStarted)
+        {
+            base.OnTouch(touchPos);
+            line.positionCount = touchPositions.Count;
+            line.SetPositions(touchPositions.ToArray());
+        }
+    }
+    
     protected override void OnTouchEndedDelta(Vector2 touchPos, Vector2 touchDelta)
     {
 
@@ -77,6 +98,10 @@ public class InputToBezierRoute : InputController
             routeComplete = true;
             touchStarted = false;
 
+            line.enabled = false;
+            
+            //line.SetPositions(new Vector3[]{ });
+            
             CreateDebugObject();
         }
     }

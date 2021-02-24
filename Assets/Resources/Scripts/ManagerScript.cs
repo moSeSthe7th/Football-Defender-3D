@@ -12,7 +12,8 @@ public class ManagerScript : MonoBehaviour
     CameraScrıpt cam;
 
     GameObject startingBall;
-    GameObject startingParticleSys;
+    [SerializeField]
+    ParticleSystem startingParticleSys;
 
     private DefenderScript player;
     private List<AttackerScript> attackers;
@@ -262,7 +263,6 @@ public class ManagerScript : MonoBehaviour
         
 
         BallScript[] balls = primaryMap.GetComponentsInChildren<BallScript>();
-        startingParticleSys = Resources.Load<GameObject>("Prefabs/StartingParticleSys");
 
         yield return new WaitForSeconds(0.2f);
         StartingAnimation(balls);
@@ -313,6 +313,11 @@ public class ManagerScript : MonoBehaviour
             ball.FallToAttacker(startingBall.transform.position);
         }
         //BallExplodeAnimationGoesThere
+
+        startingParticleSys =
+            GameObject.Instantiate(startingParticleSys, startingBall.transform.position, Quaternion.identity);
+        startingParticleSys.Play();
+        
         startingBall.SetActive(false);
     }
 

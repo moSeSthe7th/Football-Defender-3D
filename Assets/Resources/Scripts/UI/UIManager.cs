@@ -13,6 +13,9 @@ public class UIManager : MonoBehaviour
     public Image gameButton;
     public Image homebutton;
 
+    [SerializeField] private Image victory;
+    [SerializeField] private Image fail;
+    
     Sprite startSprite;
     Sprite nextSprite;
     Sprite restartSprite;
@@ -40,6 +43,9 @@ public class UIManager : MonoBehaviour
         infoText = pitch.GetComponentInChildren<Text>();
         infoText.text = "";
 
+        fail.enabled = false;
+        victory.enabled = false;
+        
         if (DataScript.GetState() == DataScript.GameState.HomePage)
         {
             gameButton.sprite = startSprite;
@@ -123,6 +129,7 @@ public class UIManager : MonoBehaviour
         homebutton.sprite = homeSprite;
         infoText.text = "GOAL!";
         //onGamePanel.SetActive(false);
+        fail.enabled = true;
         gamePanel.SetActive(true);
     }
     
@@ -132,6 +139,7 @@ public class UIManager : MonoBehaviour
         homebutton.sprite = homeSprite;
         infoText.text = "WOW!";
         //onGamePanel.SetActive(false);
+        victory.enabled = true;
         gamePanel.SetActive(true);
     }
 

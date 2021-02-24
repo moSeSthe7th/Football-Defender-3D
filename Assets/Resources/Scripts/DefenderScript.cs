@@ -25,7 +25,8 @@ public class DefenderScript : MonoBehaviour
         InputToJoyStick inputController;
         private InputToBezierRoute inputBezierController;
 #else
-        InputToBezierRoute inputController;
+    private bool slided = false;
+        InputToBezierRoute inputBezierController;
 #endif
     List<Vector3> defenderSlidePositions;
     public float defenderSpeed;
@@ -38,9 +39,12 @@ public class DefenderScript : MonoBehaviour
     private Camera mainCam;
 
     private bool cuttedWhileSliding;
+
+    [SerializeField] private LineRenderer line;
     
     void Start()
     {
+        line = GetComponent<LineRenderer>();
         animator = GetComponentInChildren<Animator>();
         defenderRb = GetComponent<Rigidbody>();
         vibration = new VibrationHandler();
@@ -51,9 +55,9 @@ public class DefenderScript : MonoBehaviour
 
 #if JOYSTICK
         inputController = new InputToJoyStick(transform);
-        inputBezierController = new InputToBezierRoute(transform);
+        inputBezierController = new InputToBezierRoute(transform,line);
 #else
-        inputController = new InputToBezierRoute(transform.position);
+        inputBezierController = new InputToBezierRoute(transform);
         //defenderSlidePositions = new List<Vector3>();
 #endif
         defenderSlidePositions = new List<Vector3>();
@@ -109,12 +113,12 @@ public class DefenderScript : MonoBehaviour
         }
        
 #else
-        if (inputController.routeComplete && !slided)
+        if (inputBezierController.routeComplete && !slided)
         {
-            defenderSlidePositions = inputController.bezierPoints;
+            defenderSlidePositions = inputBezierController.bezierPoints;
             StartCoroutine(SlidingTackle());
 
-            inputController.routeComplete = false;
+            inputBezierController.routeComplete = false;
             slided = true;
         }
 #endif
@@ -123,7 +127,10 @@ public class DefenderScript : MonoBehaviour
 
     private void OnDestroy()
     {
+        #if JOYSTICK
         inputController.Dispose();
+        inputBezierController.Dispose();
+        #endif
     }
 
 
@@ -131,7 +138,7 @@ public class DefenderScript : MonoBehaviour
     {
         Debug.LogError("basladim kosmaya kardas");
 
-        
+      #if JOYSTICK  
         ResetAnimator();
         animator.SetBool(DataScript.animHash.defnderHash.run, true);
         
@@ -204,9 +211,12 @@ public class DefenderScript : MonoBehaviour
         StopCoroutine(defenderCorountine);
         defenderCorountine = null;
 
+        #endif
         
         if(DataScript.GetState() == DataScript.GameState.onGame)
             StartSlidingBezier();
+        
+        yield return null;
     }
 
     void StartSlidingBezier()

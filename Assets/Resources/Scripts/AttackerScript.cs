@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class AttackerScript : MonoBehaviour
 {
+    [SerializeField] private ParticleSystem tackledParticle;
+    
     public Animator attackerAnimator;
 
     public Transform cubeReplica;
@@ -154,6 +156,8 @@ public class AttackerScript : MonoBehaviour
     {
         if(isTackled == false)
         {
+            tackledParticle = Instantiate(tackledParticle, transform.position, Quaternion.identity);
+            tackledParticle.Play();
             isTackled = true;
             ApplyTackleForce(tacklePos);
             StopCoroutine(dribbleBall);
